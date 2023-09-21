@@ -1,0 +1,249 @@
+---
+title: "Assignment 2"
+author: "Anton Linnér"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+set.seed(2) 
+library(copula)
+library(scatterplot3d)
+```
+\section{Theoretical questions}
+
+
+
+\section{Exercise 2}
+
+
+```{r Exercise 2.1}
+myCop.norm <- ellipCopula(family="normal", dim=3, dispstr="ex", param = 0.4)
+x1<- rCopula(500, myCop.norm)
+scatterplot3d(x1)
+
+rho1 = cor(x1[,1], x1[,2])
+rho2 = cor(x1[,1], x1[,3])
+rho3 = cor(x1[,2], x1[,3])
+
+#Kendall
+t1 = 2/pi*asin(rho1)
+t2 = 2/pi*asin(rho2)
+t3 = 2/pi*asin(rho3)
+
+t1_theo = 2/pi*asin(0.4) # Completely theoretical
+
+cor.test(x1[,1], x1[,2], method="kendall") 
+cor.test(x1[,1], x1[,3], method="kendall")
+cor.test(x1[,2], x1[,3], method="kendall")
+
+#Spearman
+rho_s1 = 6/pi*asin(rho1/2)
+rho_s2 = 6/pi*asin(rho2/2)
+rho_s3 = 6/pi*asin(rho3/2)
+
+cor.test(x1[,1], x1[,2], method="spearman") 
+cor.test(x1[,1], x1[,3], method="spearman")
+cor.test(x1[,2], x1[,3], method="spearman")
+
+rho_s_theo = 6/pi*asin(0.2)
+
+
+(rho_Ss1 = cor(rank(x1[,1]), rank(x1[,2])))
+(rho_Ss2 = cor(rank(x1[,1]), rank(x1[,3])))
+(rho_Ss3 = cor(rank(x1[,2]), rank(x1[,3])))
+
+```
+jasdjasd
+```{r Exercise 2.2a}
+myCop.t1 <- ellipCopula(family="t", dim=2, dispstr="ex", param = -0.4, df = 8)
+myCop.t2 <- ellipCopula(family="t", dim=2, dispstr="ex", param = 0, df = 8)
+myCop.t3 <- ellipCopula(family="t", dim=2, dispstr="ex", param = 0.4, df = 8)
+
+x2 = rCopula(500, myCop.t1)
+x3 = rCopula(500, myCop.t2)
+x4 = rCopula(500, myCop.t3)
+```
+
+
+
+``` {r Exercise 2.2b}
+plot(x2)
+plot(x3)
+plot(x4)
+
+rho1 = cor(x2[,1], x2[,2])
+rho2 = cor(x3[,1], x3[,2])
+rho3 = cor(x4[,1], x4[,2])
+
+#Kendall
+t1 = 2/pi*asin(rho1)
+t2 = 2/pi*asin(rho2)
+t3 = 2/pi*asin(rho3)
+
+t1_theo = 2/pi*asin(0.4) # Completely theoretical
+
+cor.test(x2[,1], x2[,2], method="kendall") 
+cor.test(x3[,1], x3[,2], method="kendall")
+cor.test(x4[,2], x4[,2], method="kendall")
+
+#Spearman
+rho_s1 = 6/pi*asin(rho1/2)
+rho_s2 = 6/pi*asin(rho2/2)
+rho_s3 = 6/pi*asin(rho3/2)
+
+cor.test(x2[,1], x2[,2], method="spearman") 
+cor.test(x3[,1], x3[,2], method="spearman")
+cor.test(x4[,1], x4[,2], method="spearman")
+
+rho_s_theo = 6/pi*asin(0.2)
+
+
+(rho_Ss1 = cor(rank(x2[,1]), rank(x2[,2])))
+(rho_Ss2 = cor(rank(x3[,1]), rank(x3[,2])))
+(rho_Ss3 = cor(rank(x4[,1]), rank(x4[,2])))
+```
+
+```{r Exercise 2.3}
+frank.cop <- frankCopula(dim = 3, param=3)
+x5 = rCopula(500, frank.cop)
+
+rho1_x5 = cor(x5[,1], x5[,2])
+rho2_x5 = cor(x5[,1], x5[,3])
+rho3_x5 = cor(x5[,2], x5[,3])
+
+t1_x5 = 2/pi*asin(rho1_x5)
+t2_x5 = 2/pi*asin(rho2_x5)
+t3_x5 = 2/pi*asin(rho3_x5)
+
+rho_s1 = 6/pi*asin(rho1_x5/2)
+rho_s2 = 6/pi*asin(rho2_x5/2)
+rho_s3 = 6/pi*asin(rho3_x5/2)
+
+
+```
+
+```{r Exercise 2.4}
+gammaRand <- function(n,theta){
+   B= 1/theta
+   M=runif(n)
+   E = rexp(2*n)
+   dim(E) = c(2,n)
+   E=t(E)
+   U = E/M
+   sample = B/(U+B)
+  
+}
+(gammaRand(2, 0.5))
+
+```
+```{r Exercise 2.5}
+X = runif(1000)
+Y= atanh(X)
+Z=-Y
+
+cor.test(X,Y, method="kendall")
+cor.test(X,Z, method = "kendall")
+
+cor.test(X,Y, method= "spearman")
+cor.test(X,Z, method = "spearman")
+
+cor(X,Y)
+cor(X,Z)
+```
+The plots for the t-copula. We can see h
+```{r Exercise 3}
+par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0)) #mfrow = c(1,2) is one row two cols.
+
+
+plot(x3)
+persp(myCop.t1, pCopula)
+contour(myCop.t1, dCopula)
+
+
+plot(x4)
+persp(myCop.t2, pCopula)
+persp(myCop.t2, dCopula)
+
+plot(x5)
+persp(myCop.t3, pCopula)
+contour(myCop.t3, dCopula)
+```
+
+```{r Exercise 4}
+# Start with simulating samples:
+gauss.cop <- ellipCopula(family="normal", dim=2, dispstr="ex", param = 0.7) # Is this gaussian?
+gumbel.cop <- archmCopula("gumbel",2 )
+clayton.cop <- claytonCopula(2.2, dim = 2)
+myCop.t <- ellipCopula(family="t", dim=2, dispstr="ex", param = 0.71, df = 4)
+x6= rCopula(2000, gauss.cop)
+x7= rCopula(2000, gumbel.cop)
+x8= rCopula(2000, clayton.cop)
+x9= rCopula(2000, myCop.t)
+
+
+par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0))
+plot(x6)
+plot(x7)
+plot(x8)
+plot(x9)
+
+```
+
+```{r Quantile transformation}
+par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0))
+x6= rCopula(2000, gauss.cop)
+x7= rCopula(2000, gumbel.cop)
+x8= rCopula(2000, clayton.cop)
+x9= rCopula(2000, myCop.t)
+
+x6[,1] = rank(x6[,1])/length(x6[,1])
+x6[,2] = rank(x6[,2])/length(x6[,2])
+
+x6[,1] <- qnorm(x6[,1])
+x6[,2] <- qnorm(x6[,2])
+
+
+
+x7[,1] = rank(x7[,1])/length(x7[,1])
+x7[,2] = rank(x7[,2])/length(x7[,2])
+
+x7[,1] <- qnorm(x7[,1])
+x7[,2] <- qnorm(x7[,2])
+
+
+x8[,1] = rank(x8[,1])/length(x8[,1])
+x8[,2] = rank(x8[,2])/length(x8[,2])
+
+x8[,1] <- qnorm(x8[,1])
+x8[,2] <- qnorm(x8[,2])
+
+x9[,1] = rank(x9[,1])/length(x9[,1])
+x9[,2] = rank(x9[,2])/length(x9[,2])
+
+x9[,1] <- qnorm(x9[,1])
+x9[,2] <- qnorm(x9[,2])
+plot(x6)
+plot(x7)
+plot(x8)
+plot(x9)
+
+```
+
+
+```{r Exercise 5}
+cop_dist1 <- mvdc(copula=ellipCopula(family="norm", dim = 2, param=0.75), margins=c("norm", "exp"), paramMargins = list(list(mean=0,sd=2), list(rate=2))) 
+cop_dist2 <- mvdc(copula=archmCopula("gumbel",dim=2, 2), margins=c("exp", "exp"), paramMargins = list(list(rate=2), list(rate=2)))
+
+x10 = rMvdc(500, cop_dist1)
+
+```
+
+
+
+
+
+
