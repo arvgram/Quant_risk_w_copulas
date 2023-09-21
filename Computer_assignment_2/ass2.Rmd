@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 set.seed(2) 
 library(copula)
 library(scatterplot3d)
+library(ggplot2)
+library(reshape2)
 ```
 \section{Theoretical questions}
 
@@ -22,7 +24,7 @@ library(scatterplot3d)
 
 ```{r Exercise 2.1}
 myCop.norm <- ellipCopula(family="normal", dim=3, dispstr="ex", param = 0.4)
-x1<- rCopula(500, myCop.norm)
+x1 <- rCopula(500, myCop.norm)
 scatterplot3d(x1)
 
 rho1 = cor(x1[,1], x1[,2])
@@ -140,6 +142,8 @@ gammaRand <- function(n,theta){
 (gammaRand(2, 0.5))
 
 ```
+
+
 ```{r Exercise 2.5}
 X = runif(1000)
 Y= atanh(X)
@@ -255,9 +259,14 @@ cor.test(x12[,1],x12[,2], method = "spearman")
 
 ```
 
-```{r exercise 5}
-par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0))
+```{r exercise 6}
+#Basically what is left to do is to find good xlim and ylim for the plots, and add plots for the x10, x11 and x12. 
+par(mfrow= c(2,2))
 plot(x10)
+contour(cop_dist1, dMvdc, xlim=c(-6, 4), ylim=c(-0.1, 1.5))
+contour(cop_dist2, dMvdc, xlim=c(-1,1), ylim=c(-1,1))
+persp(cop_dist3, dMvdc, xlim=c(-1,1), ylim=c(-1,1))
+contour(cop_dist3, dMvdc, xlim=c(-6, 4), ylim=c(-0.1, 1.5))
 ```
 
 
