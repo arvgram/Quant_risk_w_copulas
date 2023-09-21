@@ -1,4 +1,4 @@
----
+ ---
 title: "Assignment 2"
 author: "Anton Linnér"
 date: "`r Sys.Date()`"
@@ -236,11 +236,30 @@ plot(x9)
 
 ```{r Exercise 5}
 cop_dist1 <- mvdc(copula=ellipCopula(family="norm", dim = 2, param=0.75), margins=c("norm", "exp"), paramMargins = list(list(mean=0,sd=2), list(rate=2))) 
-cop_dist2 <- mvdc(copula=archmCopula("gumbel",dim=2, 2), margins=c("exp", "exp"), paramMargins = list(list(rate=2), list(rate=2)))
+cop_dist2 <- mvdc(copula=archmCopula("gumbel",dim=2, 2), margins=c("exp", "exp"), paramMargins = list(list(rate=4), list(rate=2)))
 
 x10 = rMvdc(500, cop_dist1)
+x11 = rMvdc(500, cop_dist2)
+# FIrst 
+cor.test(x10[,1],x10[,2], method = "spearman")
+cor(x10[,1],x10[,2])
+
+#Second
+cor.test(x11[,1],x11[,2], method = "spearman")
+cor(x11[,1],x11[,2])
+
+#third compared to 2nd
+cop_dist3 <- mvdc(copula=archmCopula("gumbel",dim=2, 2), margins=c("norm", "norm"), paramMargins = list(list(mean=0,sd=2), list(mean=0,sd=2)))
+x12 = rMvdc(500, cop_dist3)
+cor.test(x12[,1],x12[,2], method = "spearman")
 
 ```
+
+```{r exercise 5}
+par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0))
+plot(x10)
+```
+
 
 
 
