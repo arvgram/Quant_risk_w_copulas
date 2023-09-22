@@ -270,6 +270,21 @@ contour(cop_dist3, dMvdc, xlim=c(-6, 4), ylim=c(-0.1, 1.5))
 ```
 
 
+```{r Exercise 7 car data}
+#Load data. Also, change path to where the textfile is. 
+car_data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/cardata.txt")
+
+#Pairwise scatterplot of the data
+pairs(car_data)
+cor(car_data, method = "spearman")
+cor.test(car_data[,1],car_data[,3], method = "spearman")
+cor.test(car_data[,1],car_data[,2], method = "spearman")
+
+```
+
+
+
+
 
 
 
