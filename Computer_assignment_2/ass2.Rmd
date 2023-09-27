@@ -282,6 +282,111 @@ cor.test(car_data[,1],car_data[,2], method = "spearman")
 
 ```
 
+```{r Exercise 8}
+#Calculating theta nad rho from tau= 0.5 gives rho 
+Gauss <- mvdc( ellipCopula(family="normal", dim=2, dispstr="ex", param = 0.7), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))#have to give Marginparams as list of list.
+
+t_cop = mvdc( ellipCopula(family="t", dim=2, dispstr="ex", param = 0.7, df = 2), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))
+
+gumb = mvdc( archmCopula("gumbel" , 2), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))
+
+
+#First we need the 95th percentile of lognormal(0,1), then we plug these in to copula
+# We can use quantile(data, percentile) if we have data to get percentile. 
+
+#The threshould is:
+u = qlnorm(0.95,0,1)
+prob_gauss = 1- pMvdc(c(u,u), Gauss)
+prob_t = 1- pMvdc(c(u,u), t_cop)
+prob_gumb =1- pMvdc(c(u,u), gumb)
+
+r1 = prob_gauss/prob_t
+r2 = prob_gauss/prob_gumb
+r3 = prob_t/prob_gumb
+
+u = qlnorm(0.99,0,1)
+prob_gauss.a = 1- pMvdc(c(u,u), Gauss)
+prob_t.b = 1- pMvdc(c(u,u), t_cop)
+prob_gumb.c =1- pMvdc(c(u,u), gumb)
+#We can see that prob_gauss increased
+r1a = prob_gauss/prob_t
+r2b = prob_gauss/prob_gumb
+r3c = prob_t/prob_gumb
+
+
+#loss.t = sum(loss[apply(loss > u, 1, all), ])/length(loss)
+#loss.t
+#Are both numbers over threshould
+
+#loss.t = sum(loss[apply(loss > u, 1, all), ])/(length(loss))
+#loss.t
+#Are both numbers over threshould
+#t.cop
+loss = rMvdc(10000, t_cop)
+loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
+loss = rowSums(loss)
+E.t = mean(loss)
+
+#Gauss
+loss = rMvdc(10000, Gauss)
+loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
+loss = rowSums(loss)
+E.Gauss = mean(loss)
+
+#Gumble
+loss = rMvdc(10000, gumb)
+loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
+loss = rowSums(loss)
+E.gumb = mean(loss)
+
+#loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
+#mean(loss)
+par(mfrow= c(1,3))
+u = qlnorm(0.95,0,1)
+
+loss = rMvdc(100000, Gauss)
+tail.gauss = loss[apply(loss > u, 1, all), ]
+plot(tail.gauss,ylim=c(0,100), xlim=c(0,100))
+
+loss = rMvdc(100000, gumb)
+tail.gumb = loss[apply(loss > u, 1, all), ]
+plot(tail.gumb,ylim=c(0,100), xlim=c(0,100))
+
+loss = rMvdc(100000, t_cop)
+tail.t_cop = loss[apply(loss > u, 1, all), ]
+plot(tail.t_cop,ylim=c(0,100), xlim=c(0,100))
+```
+
+```{r Exercise 9}
+library(fitdistrplus)
+
+ins.data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
+ins.data[,1] = ins.data[,1]/max(ins.data[,1])
+plot(ins.data[,1], ins.data[,2],log="xy")
+cor9 = cor(ins.data[,1], ins.data[,2])
+
+#First margin:
+
+par(mfrow= c(2,1))
+
+hist(ins.data[,1], breaks=1000, xlim=c(0,1))
+ins.data[,1] = ins.data[,1]/max(ins.data[,1])
+margin1 = mledist(ins.data[,1], "exp")
+margin1$estimate
+
+test1 = rexp(length(ins.data[,1]), margin1$estimate)
+hist(test1, breaks=1000, xlim=c(0,1))
+
+#Second margin:
+
+hist(ins.data[,2], breaks=1000)
+
+
+
+```
+
+
+
 
 
 
