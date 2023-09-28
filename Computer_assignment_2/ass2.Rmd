@@ -20,8 +20,20 @@ library(scatterplot3d)
 library(ggplot2)
 library(reshape2)
 ```
-
 \newpage
+\section{Exercise 1}
+\textbf{1:}
+An Archimedean copula is a copula on the form: $C(u_1,..., u_n) =       \varphi(\sum^n_{i=1}\varphi^{-1}(u_i))$, where $\varphi$ is the copula's generator function. The conditions for this generator function is that \begin{itemize}
+        \item $\varphi(0) = 1,$ $\varphi(\infty) = 0$
+        \item $\varphi$ is decreasing
+        \item $\varphi$ is continuous
+\end{itemize} 
+A convenient way of obtaining such generator functions is to take the Laplace transform of a random variable, $\varphi_X(t) = \int_0^{\infty}\mathrm{e}^{-tx}f_X(x)dx$. Depending on choice of generator function we retrieve different families of Archimedean copulas, such as Clayton, Gumbel or Frank copulas.
+
+\textbf{2:}
+Frank copula: This copulas has generator function $\varphi(t) = \mathrm{ln}\left(\frac{\mathrm{e}^{-\theta t}-1}{\mathrm{e}^{-\theta}-1}\right)$, C(u,v) = $\varphi^{-1}(\varphi(u) + \varphi(v)) = \frac{1}{\theta}\mathrm{ln}\left(1+\frac{(\mathrm{e}^{-\theta u}-1)(\mathrm{e}^{-\theta v}-1)}{\mathrm{e}^{-\theta}-1}\right)$
+
+Clayton copula: The generator is $\varphi(t) = t^{-\theta}-1$, which results in a copula $C(u,v) = (u^{-\theta}+v^{-\theta}-1)^{-1/\theta}$
 \section{Exercise 2}
 
 \subsection{Exercise 2.1}
