@@ -1,6 +1,11 @@
- ---
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+---
 title: "Assignment 2"
-author: "Anton Linnér"
+author: "Arvid Gramer and Anton Linnér"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -8,59 +13,52 @@ output: pdf_document
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 set.seed(2) 
 library(copula)
 library(scatterplot3d)
 library(ggplot2)
 library(reshape2)
 ```
-\section{Theoretical questions}
 
-
-
+\newpage
 \section{Exercise 2}
 
-
-```{r Exercise 2.1}
+\subsection{Exercise 2.1}
+We can see that Spearmans Rho and normal correlation are somewhat similar, but Kendalls Tau is lower than both. We also see that the theoretical values are very close to the empirical values for all methods. And lastly we see that when we rank the observations, Spearmans rho gives the same value as when we didn't rank the values. 
+```{r Exercise 2.1, echo = TRUE, include = TRUE}
 myCop.norm <- ellipCopula(family="normal", dim=3, dispstr="ex", param = 0.4)
 x1 <- rCopula(500, myCop.norm)
 scatterplot3d(x1)
-
-rho1 = cor(x1[,1], x1[,2])
-rho2 = cor(x1[,1], x1[,3])
-rho3 = cor(x1[,2], x1[,3])
+#Correlation
+(rho1 = cor(x1[,1], x1[,2]))
+(rho2 = cor(x1[,1], x1[,3]))
+(rho3 = cor(x1[,2], x1[,3]))
 
 #Kendall
-t1 = 2/pi*asin(rho1)
-t2 = 2/pi*asin(rho2)
-t3 = 2/pi*asin(rho3)
-
-t1_theo = 2/pi*asin(0.4) # Completely theoretical
-
-cor.test(x1[,1], x1[,2], method="kendall") 
-cor.test(x1[,1], x1[,3], method="kendall")
-cor.test(x1[,2], x1[,3], method="kendall")
+(cor(x1[,1], x1[,2], method="kendall")) 
+(cor(x1[,1], x1[,3], method="kendall"))
+(cor(x1[,2], x1[,3], method="kendall"))
+#Theoretical
+(t1_theo = 2/pi*asin(0.4)) 
 
 #Spearman
-rho_s1 = 6/pi*asin(rho1/2)
-rho_s2 = 6/pi*asin(rho2/2)
-rho_s3 = 6/pi*asin(rho3/2)
-
-cor.test(x1[,1], x1[,2], method="spearman") 
-cor.test(x1[,1], x1[,3], method="spearman")
-cor.test(x1[,2], x1[,3], method="spearman")
-
+(cor(x1[,1], x1[,2], method="spearman"))
+(cor(x1[,1], x1[,3], method="spearman"))
+(cor(x1[,2], x1[,3], method="spearman"))
+#Theoretical
 rho_s_theo = 6/pi*asin(0.2)
 
-
+#Rho 
 (rho_Ss1 = cor(rank(x1[,1]), rank(x1[,2])))
 (rho_Ss2 = cor(rank(x1[,1]), rank(x1[,3])))
 (rho_Ss3 = cor(rank(x1[,2]), rank(x1[,3])))
 
 ```
-jasdjasd
-```{r Exercise 2.2a}
+\newpage
+
+\subsection{Exercise 2.2}
+```{r Exercise 2.2a,echo = TRUE, include = TRUE}
 myCop.t1 <- ellipCopula(family="t", dim=2, dispstr="ex", param = -0.4, df = 8)
 myCop.t2 <- ellipCopula(family="t", dim=2, dispstr="ex", param = 0, df = 8)
 myCop.t3 <- ellipCopula(family="t", dim=2, dispstr="ex", param = 0.4, df = 8)
@@ -71,64 +69,60 @@ x4 = rCopula(500, myCop.t3)
 ```
 
 
-
-``` {r Exercise 2.2b}
+As in previously when Gaussian copula was used, the methods seem to give results that are in accordance with the theoretical results. 
+``` {r Exercise 2.2b, echo = TRUE, include = TRUE}
 plot(x2)
 plot(x3)
 plot(x4)
 
-rho1 = cor(x2[,1], x2[,2])
-rho2 = cor(x3[,1], x3[,2])
-rho3 = cor(x4[,1], x4[,2])
+(rho1 = cor(x2[,1], x2[,2]))
+(rho2 = cor(x3[,1], x3[,2]))
+(rho3 = cor(x4[,1], x4[,2]))
 
 #Kendall
-t1 = 2/pi*asin(rho1)
-t2 = 2/pi*asin(rho2)
-t3 = 2/pi*asin(rho3)
 
-t1_theo = 2/pi*asin(0.4) # Completely theoretical
-
-cor.test(x2[,1], x2[,2], method="kendall") 
-cor.test(x3[,1], x3[,2], method="kendall")
-cor.test(x4[,2], x4[,2], method="kendall")
+#Empirical
+(cor(x2[,1], x2[,2], method="kendall")) 
+(cor(x3[,1], x3[,2], method="kendall"))
+(cor(x4[,1], x4[,2], method="kendall"))
+#Theoretical for the three cases
+(t1_theo = 2/pi*asin(-0.4)) 
+(t1_theo = 2/pi*asin(0)) 
+(t1_theo = 2/pi*asin(0.4)) 
 
 #Spearman
-rho_s1 = 6/pi*asin(rho1/2)
-rho_s2 = 6/pi*asin(rho2/2)
-rho_s3 = 6/pi*asin(rho3/2)
+#Empirical
+(cor(x2[,1], x2[,2], method="spearman")) 
+(cor(x3[,1], x3[,2], method="spearman"))
+(cor(x4[,1], x4[,2], method="spearman"))
+#Theoretical
+(rho_s_theo = 6/pi*asin(-0.2))
+(rho_s_theo = 6/pi*asin(0))
+(rho_s_theo = 6/pi*asin(0.2))
 
-cor.test(x2[,1], x2[,2], method="spearman") 
-cor.test(x3[,1], x3[,2], method="spearman")
-cor.test(x4[,1], x4[,2], method="spearman")
-
-rho_s_theo = 6/pi*asin(0.2)
-
-
-(rho_Ss1 = cor(rank(x2[,1]), rank(x2[,2])))
-(rho_Ss2 = cor(rank(x3[,1]), rank(x3[,2])))
-(rho_Ss3 = cor(rank(x4[,1]), rank(x4[,2])))
 ```
-
-```{r Exercise 2.3}
+\subsection{Exercise 2.3}
+By looking at the appendix and solving for the expression for the $\tau$ using $\theta$ = 3 and k = 1. Using this, we get a value for $\tau$ thats about 0.3, which is in agreement with what is calculated below. 
+```{r Exercise 2.3,echo = TRUE, include = TRUE}
 frank.cop <- frankCopula(dim = 3, param=3)
 x5 = rCopula(500, frank.cop)
 
-rho1_x5 = cor(x5[,1], x5[,2])
-rho2_x5 = cor(x5[,1], x5[,3])
-rho3_x5 = cor(x5[,2], x5[,3])
+(rho1_x5 = cor(x5[,1], x5[,2]))
+(rho2_x5 = cor(x5[,1], x5[,3]))
+(rho3_x5 = cor(x5[,2], x5[,3]))
 
-t1_x5 = 2/pi*asin(rho1_x5)
-t2_x5 = 2/pi*asin(rho2_x5)
-t3_x5 = 2/pi*asin(rho3_x5)
+(t1_x5 = cor(x5[,1], x5[,2], method = "kendall"))
+(t2_x5 = cor(x5[,1], x5[,3], method = "kendall"))
+(t3_x5 = cor(x5[,2], x5[,3], method = "kendall"))
 
-rho_s1 = 6/pi*asin(rho1_x5/2)
-rho_s2 = 6/pi*asin(rho2_x5/2)
-rho_s3 = 6/pi*asin(rho3_x5/2)
-
+(rho_s1 = cor(x5[,1], x5[,2], method = "kendall"))
+(rho_s2 = cor(x5[,1], x5[,3], method = "kendall"))
+(rho_s3 =cor(x5[,2], x5[,3], method = "kendall"))
 
 ```
-
-```{r Exercise 2.4}
+\subsection{Exercise 2.4}
+Below is the code for the function:
+```{r Exercise 2.4, echo = TRUE, include = TRUE}
 gammaRand <- function(n,theta){
    B= 1/theta
    M=runif(n)
@@ -139,28 +133,37 @@ gammaRand <- function(n,theta){
    sample = B/(U+B)
   
 }
-(gammaRand(2, 0.5))
+gammaRand(500, 0.5)
+gammaRand(500, 1)
+gammaRand(500, 5)
+gammaRand(500, 50)
 
 ```
+\subsection{Exercise 2.5}
+The reason T(x) is increasing is due to the fact that arctanh is increasing in this interval (between -1 and 1). 
+We get -1 and 1 as dependace for Kendalls Tau and Spearman, but only -0.914 and + 0.914 for normal correlation. Since Z and Y are created directly from X, it is reasonable that they should have perfect dependance. How ever, since there is a non-linear transform, normal Rho wont be quite as good when trying to measure this depndance. 
 
-
-```{r Exercise 2.5}
+```{r Exercise 2.5,echo = TRUE, include = TRUE}
 X = runif(1000)
 Y= atanh(X)
 Z=-Y
+par(mfrow=c(2,1))
+plot(X,Y)
+plot(X,Z)
+cor(X,Y, method="kendall")
+cor(X,Z, method = "kendall")
 
-cor.test(X,Y, method="kendall")
-cor.test(X,Z, method = "kendall")
-
-cor.test(X,Y, method= "spearman")
-cor.test(X,Z, method = "spearman")
+cor(X,Y, method= "spearman")
+cor(X,Z, method = "spearman")
 
 cor(X,Y)
 cor(X,Z)
+
 ```
-The plots for the t-copula. We can see h
-```{r Exercise 3}
-par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0)) #mfrow = c(1,2) is one row two cols.
+\section{Exercise 3}
+The plots for the t-copula. For the first plots (scatter, cdf, pdf) we can see that the plots show more dependance, which is reasonable since this is how they were created. 
+```{r Exercise 3,echo = TRUE, include = TRUE}
+par(mfrow= c(1,3)) #mfrow = c(1,2) is one row two cols.
 
 
 plot(x3)
@@ -170,25 +173,24 @@ contour(myCop.t1, dCopula)
 
 plot(x4)
 persp(myCop.t2, pCopula)
-persp(myCop.t2, dCopula)
-
-plot(x5)
-persp(myCop.t3, pCopula)
-contour(myCop.t3, dCopula)
+contour(myCop.t2, dCopula)
 ```
-
-```{r Exercise 4}
-# Start with simulating samples:
-gauss.cop <- ellipCopula(family="normal", dim=2, dispstr="ex", param = 0.7) # Is this gaussian?
+\section{Exercise 4}
+\subsection{Scatterplots}
+The plots are, in order, Gaussian, Gumble, Clayton and t-copula. We can see that there is a somewhat similar dependance in all of the plots. We can see in plot 3 (Clayton), it seems to have quite a strong lower-tail dependance. The t-copula seems to have stronger tail dependance than the Gaussian, which might be expected. The Gumble copula seems to have slightly stronger upper tail dependance.
+```{r Exercise 4,echo = TRUE, include = TRUE}
+# Copulas
+gauss.cop <- ellipCopula(family="normal", dim=2, dispstr="ex", param = 0.7) 
 gumbel.cop <- archmCopula("gumbel",2 )
 clayton.cop <- claytonCopula(2.2, dim = 2)
 myCop.t <- ellipCopula(family="t", dim=2, dispstr="ex", param = 0.71, df = 4)
+#Samples
 x6= rCopula(2000, gauss.cop)
 x7= rCopula(2000, gumbel.cop)
 x8= rCopula(2000, clayton.cop)
 x9= rCopula(2000, myCop.t)
 
-
+#Plots
 par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0))
 plot(x6)
 plot(x7)
@@ -196,8 +198,10 @@ plot(x8)
 plot(x9)
 
 ```
-
-```{r Quantile transformation}
+\newpage
+\subsection{Quantile transformation}
+What we can see in these plots is that we still have the same behaviour which was described in the previous section, only slightly clearer. 
+```{r Quantile transformation,echo = TRUE, include = TRUE}
 par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0))
 x6= rCopula(2000, gauss.cop)
 x7= rCopula(2000, gumbel.cop)
@@ -236,111 +240,111 @@ plot(x8)
 plot(x9)
 
 ```
+\section{Exercise 5}
 
+As we can see, when we use the Gumbel copula with either two exponential margins or two standard normal margins, we get a similar Spearman Rho (around 0.65 to 0.75). 
 
-```{r Exercise 5}
+```{r Exercise 5,echo = TRUE, include = TRUE}
 cop_dist1 <- mvdc(copula=ellipCopula(family="norm", dim = 2, param=0.75), margins=c("norm", "exp"), paramMargins = list(list(mean=0,sd=2), list(rate=2))) 
 cop_dist2 <- mvdc(copula=archmCopula("gumbel",dim=2, 2), margins=c("exp", "exp"), paramMargins = list(list(rate=4), list(rate=2)))
 
 x10 = rMvdc(500, cop_dist1)
 x11 = rMvdc(500, cop_dist2)
-# FIrst 
-cor.test(x10[,1],x10[,2], method = "spearman")
+# First copula
+cor(x10[,1],x10[,2], method = "spearman")
 cor(x10[,1],x10[,2])
 
-#Second
-cor.test(x11[,1],x11[,2], method = "spearman")
+#Second copula
 cor(x11[,1],x11[,2])
+cor(x11[,1],x11[,2], method = "spearman")
 
-#third compared to 2nd
-cop_dist3 <- mvdc(copula=archmCopula("gumbel",dim=2, 2), margins=c("norm", "norm"), paramMargins = list(list(mean=0,sd=2), list(mean=0,sd=2)))
+#New margins to compare with second copula
+cop_dist3 <- mvdc(copula=archmCopula("gumbel",dim=2, 2), margins=c("norm", "norm"), paramMargins = list(list(mean=0,sd=1), list(mean=0,sd=1)))
 x12 = rMvdc(500, cop_dist3)
-cor.test(x12[,1],x12[,2], method = "spearman")
+cor(x12[,1],x12[,2])
+cor(x12[,1],x12[,2], method = "spearman")
 
 ```
-
-```{r exercise 6}
-#Basically what is left to do is to find good xlim and ylim for the plots, and add plots for the x10, x11 and x12. 
-par(mfrow= c(2,2))
+\newpage
+\section{Exercise 6}
+\subsection*{Plots}
+```{r exercise 6,echo = TRUE, include = TRUE}
+par(mfrow= c(3,2))
 plot(x10)
 contour(cop_dist1, dMvdc, xlim=c(-6, 4), ylim=c(-0.1, 1.5))
-contour(cop_dist2, dMvdc, xlim=c(-1,1), ylim=c(-1,1))
-persp(cop_dist3, dMvdc, xlim=c(-1,1), ylim=c(-1,1))
-contour(cop_dist3, dMvdc, xlim=c(-6, 4), ylim=c(-0.1, 1.5))
+plot(x11)
+contour(cop_dist2, dMvdc, xlim = c(-0,0.35), ylim=c(-0,0.5))
+plot(x12)
+contour(cop_dist3, dMvdc, c(-2,2), ylim=c(-2,2))
 ```
 
-
-```{r Exercise 7 car data}
-#Load data. Also, change path to where the textfile is. 
+\newpage
+\section{Exercise 7}
+We can see that the correlation of price and horsepower is high and positive, so it does seen to be the case that vehicles with higher horsepower are more costly. Simliarly, MPGcity and price have a negative correlation. 
+```{r Exercise 7 car data,echo = TRUE, include = TRUE}
 car_data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/cardata.txt")
 
 #Pairwise scatterplot of the data
 pairs(car_data)
+#Spearman
 cor(car_data, method = "spearman")
 cor.test(car_data[,1],car_data[,3], method = "spearman")
 cor.test(car_data[,1],car_data[,2], method = "spearman")
 
 ```
-
-```{r Exercise 8}
-#Calculating theta nad rho from tau= 0.5 gives rho 
-Gauss <- mvdc( ellipCopula(family="normal", dim=2, dispstr="ex", param = 0.7), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))#have to give Marginparams as list of list.
+\newpage
+\section{Exercise 8}
+We see that the probabilites of exceeding both thresholds is around 6-8 %, when using the 95th-percentile and 1-2 % for the 99th-percentile. We can also see that the ratios don't change when we change the threshold. We also see that Gumble copula gives the highest value for expected loss at 0.395, and the t-copula gives the lowest expected value at around 0.354. \newline
+We can also see from the tail-dependance plots that the Gauss copula shows quite poor dependance. But the Gumble and t-copula shows some upper tail dependance. This makes it more reasonable to use these two copulas if what you are interested in is in the tails of a distribution. An example might be when dealing with stocks. 
+```{r Exercise 8,echo = TRUE, include = TRUE}
+Gauss <- mvdc( ellipCopula(family="normal", dim=2, dispstr="ex", param = 0.7), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))
 
 t_cop = mvdc( ellipCopula(family="t", dim=2, dispstr="ex", param = 0.7, df = 2), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))
 
 gumb = mvdc( archmCopula("gumbel" , 2), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))
 
 
-#First we need the 95th percentile of lognormal(0,1), then we plug these in to copula
-# We can use quantile(data, percentile) if we have data to get percentile. 
 
 #The threshould is:
-u = qlnorm(0.95,0,1)
-prob_gauss = 1- pMvdc(c(u,u), Gauss)
-prob_t = 1- pMvdc(c(u,u), t_cop)
-prob_gumb =1- pMvdc(c(u,u), gumb)
+(u = qlnorm(0.95,0,1))
+(prob_gauss = 1- pMvdc(c(u,u), Gauss))
+(prob_t = 1- pMvdc(c(u,u), t_cop))
+(prob_gumb =1- pMvdc(c(u,u), gumb))
 
-r1 = prob_gauss/prob_t
-r2 = prob_gauss/prob_gumb
-r3 = prob_t/prob_gumb
+(r1 = prob_gauss/prob_t)
+(r2 = prob_gauss/prob_gumb)
+(r3 = prob_t/prob_gumb)
+#The 99th percentile is:
+(u = qlnorm(0.99,0,1))
 
-u = qlnorm(0.99,0,1)
-prob_gauss.a = 1- pMvdc(c(u,u), Gauss)
-prob_t.b = 1- pMvdc(c(u,u), t_cop)
-prob_gumb.c =1- pMvdc(c(u,u), gumb)
-#We can see that prob_gauss increased
-r1a = prob_gauss/prob_t
-r2b = prob_gauss/prob_gumb
-r3c = prob_t/prob_gumb
+#The probabilites of exceeding both thresholds:
+(prob_gauss.a = 1- pMvdc(c(u,u), Gauss))
+(prob_t.b = 1- pMvdc(c(u,u), t_cop))
+(prob_gumb.c =1- pMvdc(c(u,u), gumb))
 
+(r1a = prob_gauss/prob_t)
+(r2b = prob_gauss/prob_gumb)
+(r3c = prob_t/prob_gumb)
 
-#loss.t = sum(loss[apply(loss > u, 1, all), ])/length(loss)
-#loss.t
-#Are both numbers over threshould
-
-#loss.t = sum(loss[apply(loss > u, 1, all), ])/(length(loss))
-#loss.t
-#Are both numbers over threshould
-#t.cop
+#t-copula
 loss = rMvdc(10000, t_cop)
 loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
 loss = rowSums(loss)
-E.t = mean(loss)
+(E.t = mean(loss))
 
 #Gauss
 loss = rMvdc(10000, Gauss)
 loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
 loss = rowSums(loss)
-E.Gauss = mean(loss)
+(E.Gauss = mean(loss))
 
 #Gumble
 loss = rMvdc(10000, gumb)
 loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
 loss = rowSums(loss)
-E.gumb = mean(loss)
+(E.gumb = mean(loss))
 
-#loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
-#mean(loss)
+
 par(mfrow= c(1,3))
 u = qlnorm(0.95,0,1)
 
@@ -357,34 +361,89 @@ tail.t_cop = loss[apply(loss > u, 1, all), ]
 plot(tail.t_cop,ylim=c(0,100), xlim=c(0,100))
 ```
 
-```{r Exercise 9}
-library(fitdistrplus)
-
-ins.data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
-ins.data[,1] = ins.data[,1]/max(ins.data[,1])
-plot(ins.data[,1], ins.data[,2],log="xy")
-cor9 = cor(ins.data[,1], ins.data[,2])
-
-#First margin:
-
-par(mfrow= c(2,1))
-
-hist(ins.data[,1], breaks=1000, xlim=c(0,1))
-ins.data[,1] = ins.data[,1]/max(ins.data[,1])
-margin1 = mledist(ins.data[,1], "exp")
-margin1$estimate
-
-test1 = rexp(length(ins.data[,1]), margin1$estimate)
-hist(test1, breaks=1000, xlim=c(0,1))
-
-#Second margin:
-
-hist(ins.data[,2], breaks=1000)
-
-
+```{r Exercise 9 FML}
+# library(fitdistrplus)
+# #Load data
+# ins.data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
+# plot(ins.data[,1], ins.data[,2], log="xy")
+# cor9 = cor(ins.data[,1], ins.data[,2])
+# 
+# #First margin (of log(data))
+# 
+# par(mfrow= c(2,1))
+# hist(ins.data[,1], breaks=60)
+# margin1 = mledist(ins.data[,1], "lnorm")
+# margin1$estimate
+# 
+# test1 = rlnorm(length(ins.data[,1]),margin1$estimate[1], margin1$estimate[2])
+# hist(test1, breaks=100)
+# 
+# #Second margin:
+# 
+# hist(ins.data[,2], breaks=500)
+# margin2 = mledist(ins.data[,2], "lnorm")
+# margin2$estimate
+# 
+# test2 =rlnorm(length(ins.data[,1]),margin2$estimate[1], margin2$estimate[2])
+# hist(test2, breaks=500)
+# 
+# #Create/test a copulas:
+# cop1 =  mvdc(archmCopula("gumbel",2 ), margins=c("lnorm", "lnorm"), paramMargins=list(list(mean=margin1$estimate[1],sd=margin1$estimate[2]), list(mean=margin2$estimate[1],sd=margin2$estimate[2])))#FML
+# #Create starting point (b stands for margin params, a stands for copula params)
+# loglikMvdc(start, ins.data, cop1)
+# mm <- apply(log(ins.data), 2, mean)
+# vv <- apply(log(ins.data), 2, var)
+# (b1.0 <-c(mm[1],vv[1]))
+# (b2.0 <- c(mm[2],vv[2]))
+# (a.0 <- sin(cor(dat[, 1], dat[, 2], method = "kendall") * pi/2))
+# start <- c(b1.0, b2.0, a.0,2)
+# fit <- fitMvdc(ins.data, cop1, start = start, optim.control = list(trace = TRUE, maxit = 2000))
 
 ```
 
+```{r Exercise 9 FML test 2}
+# library(fitdistrplus)
+# #Load data
+# ins.data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
+# plot(ins.data[,1], ins.data[,2], log="xy")
+# cor9 = cor(ins.data[,1], ins.data[,2])
+# dat = log(ins.data)
+# 
+# #First margin (of log(data))
+# 
+# par(mfrow= c(2,1))
+# hist(dat[,1], breaks=60)
+# margin1 = mledist(dat[,1], "norm")
+# margin1$estimate
+# 
+# test1 = rnorm(length(dat[,1]),margin1$estimate[1], margin1$estimate[2])
+# hist(test1, breaks=100)
+# 
+# #Second margin:
+# 
+# hist(dat[,2], breaks=500)
+# margin2 = mledist(dat[,2], "norm")
+# margin2$estimate
+# 
+# test2 =rnorm(length(ins.data[,1]),margin2$estimate[1], margin2$estimate[2])
+# hist(test2, breaks=500)
+# 
+# #Create/test a copulas:
+# cop1 =  mvdc(archmCopula("gumbel",3 ), margins=c("norm", "norm"), paramMargins=list(list(mean=margin1$estimate[1],sd=margin1$estimate[2]), list(mean=margin2$estimate[1],sd=margin2$estimate[2])))
+# #FML
+# #Create starting point (b stands for margin params, a stands for copula params)
+# 
+# start2=c(margin1$estimate[1], margin1$estimate[2],margin2$estimate[1], margin2$estimate[2],0.5)
+# loglikMvdc(start, dat, cop1)
+# mm <- apply(dat, 2, mean)
+# vv <- apply(dat, 2, var)
+# (b1.0 <-c(mm[1],vv[1]))
+# (b2.0 <- c(mm[2],vv[2]))
+# (a.0 <- 1/(1-cor(dat[, 1], dat[, 2], method = "kendall")))
+# start <- c(b1.0, b2.0, a.0)
+# fit <- fitMvdc(dat, cop1, start = start, optim.control = list(trace = TRUE, maxit = 2000))
+
+```
 
 
 
