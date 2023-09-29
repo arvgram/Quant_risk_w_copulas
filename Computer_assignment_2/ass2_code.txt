@@ -1,0 +1,395 @@
+
+---
+set.seed(2) 
+library(copula)
+library(scatterplot3d)
+library(ggplot2)
+library(reshape2)
+
+
+
+# Exercise 2.1
+myCop.norm <- ellipCopula(family="normal", dim=3, dispstr="ex", param = 0.4)
+x1 <- rCopula(500, myCop.norm)
+scatterplot3d(x1)
+
+# Correlations:
+(rho1 = cor(x1[,1], x1[,2]))
+(rho2 = cor(x1[,1], x1[,3]))
+(rho3 = cor(x1[,2], x1[,3]))
+
+#Kendall
+(cor(x1[,1], x1[,2], method="kendall")) 
+(cor(x1[,1], x1[,3], method="kendall"))
+(cor(x1[,2], x1[,3], method="kendall"))
+#Theoretical
+(t1_theo = 2/pi*asin(0.4)) 
+
+#Spearman
+(cor(x1[,1], x1[,2], method="spearman"))
+(cor(x1[,1], x1[,3], method="spearman"))
+(cor(x1[,2], x1[,3], method="spearman"))
+#Theoretical
+rho_s_theo = 6/pi*asin(0.2)
+
+#Rho 
+(rho_Ss1 = cor(rank(x1[,1]), rank(x1[,2])))
+(rho_Ss2 = cor(rank(x1[,1]), rank(x1[,3])))
+(rho_Ss3 = cor(rank(x1[,2]), rank(x1[,3])))
+
+
+
+# Exercise 2.2a
+myCop.t1 <- ellipCopula(family="t", dim=2, dispstr="ex", param = -0.4, df = 8)
+myCop.t2 <- ellipCopula(family="t", dim=2, dispstr="ex", param = 0, df = 8)
+myCop.t3 <- ellipCopula(family="t", dim=2, dispstr="ex", param = 0.4, df = 8)
+
+x2 = rCopula(500, myCop.t1)
+x3 = rCopula(500, myCop.t2)
+x4 = rCopula(500, myCop.t3)
+
+# Exercise 2.2b
+plot(x2)
+plot(x3)
+plot(x4)
+
+(rho1 = cor(x2[,1], x2[,2]))
+(rho2 = cor(x3[,1], x3[,2]))
+(rho3 = cor(x4[,1], x4[,2]))
+
+#Kendall:
+#Empirical
+(cor(x2[,1], x2[,2], method="kendall")) 
+(cor(x3[,1], x3[,2], method="kendall"))
+(cor(x4[,1], x4[,2], method="kendall"))
+#Theoretical for the three cases
+(t1_theo = 2/pi*asin(-0.4)) 
+(t1_theo = 2/pi*asin(0)) 
+(t1_theo = 2/pi*asin(0.4)) 
+
+#Spearman:
+#Empirical
+(cor(x2[,1], x2[,2], method="spearman")) 
+(cor(x3[,1], x3[,2], method="spearman"))
+(cor(x4[,1], x4[,2], method="spearman"))
+#Theoretical
+(rho_s_theo = 6/pi*asin(-0.2))
+(rho_s_theo = 6/pi*asin(0))
+(rho_s_theo = 6/pi*asin(0.2))
+
+# Exercise 2.3
+frank.cop <- frankCopula(dim = 3, param=3)
+x5 = rCopula(500, frank.cop)
+
+(rho1_x5 = cor(x5[,1], x5[,2]))
+(rho2_x5 = cor(x5[,1], x5[,3]))
+(rho3_x5 = cor(x5[,2], x5[,3]))
+
+(t1_x5 = cor(x5[,1], x5[,2], method = "kendall"))
+(t2_x5 = cor(x5[,1], x5[,3], method = "kendall"))
+(t3_x5 = cor(x5[,2], x5[,3], method = "kendall"))
+
+(rho_s1 = cor(x5[,1], x5[,2], method = "kendall"))
+(rho_s2 = cor(x5[,1], x5[,3], method = "kendall"))
+(rho_s3 =cor(x5[,2], x5[,3], method = "kendall"))
+
+# Exercise 2.4
+gammaRand <- function(n,theta){
+   B= 1/theta
+   M=runif(n)
+   E = rexp(2*n)
+   dim(E) = c(2,n)
+   E=t(E)
+   U = E/M
+   sample = B/(U+B)
+  
+}
+gammaRand(500, 0.5)
+gammaRand(500, 1)
+gammaRand(500, 5)
+gammaRand(500, 50)
+
+# Exercise 2.5}
+X = runif(1000)
+Y= atanh(X)
+Z=-Y
+par(mfrow=c(2,1))
+plot(X,Y)
+plot(X,Z)
+cor(X,Y, method="kendall")
+cor(X,Z, method = "kendall")
+
+cor(X,Y, method= "spearman")
+cor(X,Z, method = "spearman")
+
+cor(X,Y)
+cor(X,Z)
+
+
+# Exercise 3
+
+par(mfrow= c(1,3)) #mfrow = c(1,2) is one row two cols.
+
+plot(x3)
+persp(myCop.t1, pCopula)
+contour(myCop.t1, dCopula)
+
+
+plot(x4)
+persp(myCop.t2, pCopula)
+contour(myCop.t2, dCopula)
+
+#Exercise 4
+# Copulas
+gauss.cop <- ellipCopula(family="normal", dim=2, dispstr="ex", param = 0.7) 
+gumbel.cop <- archmCopula("gumbel",2 )
+clayton.cop <- claytonCopula(2.2, dim = 2)
+myCop.t <- ellipCopula(family="t", dim=2, dispstr="ex", param = 0.71, df = 4)
+#Samples
+x6= rCopula(2000, gauss.cop)
+x7= rCopula(2000, gumbel.cop)
+x8= rCopula(2000, clayton.cop)
+x9= rCopula(2000, myCop.t)
+
+#Plots
+par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0))
+plot(x6)
+plot(x7)
+plot(x8)
+plot(x9)
+
+# Quantile transformation
+par(mfrow= c(2,2), mar = c(2,2,1,1), oma=c(1,1,0,0), mgp = c(2,1,0))
+x6= rCopula(2000, gauss.cop)
+x7= rCopula(2000, gumbel.cop)
+x8= rCopula(2000, clayton.cop)
+x9= rCopula(2000, myCop.t)
+
+x6[,1] = rank(x6[,1])/length(x6[,1])
+x6[,2] = rank(x6[,2])/length(x6[,2])
+
+x6[,1] <- qnorm(x6[,1])
+x6[,2] <- qnorm(x6[,2])
+
+
+
+x7[,1] = rank(x7[,1])/length(x7[,1])
+x7[,2] = rank(x7[,2])/length(x7[,2])
+
+x7[,1] <- qnorm(x7[,1])
+x7[,2] <- qnorm(x7[,2])
+
+
+x8[,1] = rank(x8[,1])/length(x8[,1])
+x8[,2] = rank(x8[,2])/length(x8[,2])
+
+x8[,1] <- qnorm(x8[,1])
+x8[,2] <- qnorm(x8[,2])
+
+x9[,1] = rank(x9[,1])/length(x9[,1])
+x9[,2] = rank(x9[,2])/length(x9[,2])
+
+x9[,1] <- qnorm(x9[,1])
+x9[,2] <- qnorm(x9[,2])
+plot(x6)
+plot(x7)
+plot(x8)
+plot(x9)
+
+# Exercise 5
+cop_dist1 <- mvdc(copula=ellipCopula(family="norm", dim = 2, param=0.75), margins=c("norm", "exp"), paramMargins = list(list(mean=0,sd=2), list(rate=2))) 
+cop_dist2 <- mvdc(copula=archmCopula("gumbel",dim=2, 2), margins=c("exp", "exp"), paramMargins = list(list(rate=4), list(rate=2)))
+
+x10 = rMvdc(500, cop_dist1)
+x11 = rMvdc(500, cop_dist2)
+# First copula
+cor(x10[,1],x10[,2], method = "spearman")
+cor(x10[,1],x10[,2])
+
+#Second copula
+cor(x11[,1],x11[,2])
+cor(x11[,1],x11[,2], method = "spearman")
+
+#New margins to compare with second copula
+cop_dist3 <- mvdc(copula=archmCopula("gumbel",dim=2, 2), margins=c("norm", "norm"), paramMargins = list(list(mean=0,sd=1), list(mean=0,sd=1)))
+x12 = rMvdc(500, cop_dist3)
+cor(x12[,1],x12[,2])
+cor(x12[,1],x12[,2], method = "spearman")
+
+# Exercise 6}
+par(mfrow= c(3,2))
+plot(x10)
+contour(cop_dist1, dMvdc, xlim=c(-6, 4), ylim=c(-0.1, 1.5))
+plot(x11)
+contour(cop_dist2, dMvdc, xlim = c(-0,0.35), ylim=c(-0,0.5))
+plot(x12)
+contour(cop_dist3, dMvdc, c(-2,2), ylim=c(-2,2))
+
+# Exercise 7
+car_data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/cardata.txt")
+
+#Pairwise scatterplot of the data
+pairs(car_data)
+#Spearman
+cor(car_data, method = "spearman")
+cor.test(car_data[,1],car_data[,3], method = "spearman")
+cor.test(car_data[,1],car_data[,2], method = "spearman")
+
+# Exercise 8
+Gauss <- mvdc( ellipCopula(family="normal", dim=2, dispstr="ex", param = 0.7), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))
+
+t_cop = mvdc( ellipCopula(family="t", dim=2, dispstr="ex", param = 0.7, df = 2), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))
+
+gumb = mvdc( archmCopula("gumbel" , 2), margins=c("lnorm", "lnorm"), paramMargins = list(list(mean=0, sd=1), list(mean=0, sd=1)))
+
+
+
+# The threshould is:
+(u = qlnorm(0.95,0,1))
+(prob_gauss = 1- pMvdc(c(u,u), Gauss))
+(prob_t = 1- pMvdc(c(u,u), t_cop))
+(prob_gumb =1- pMvdc(c(u,u), gumb))
+
+(r1 = prob_gauss/prob_t)
+(r2 = prob_gauss/prob_gumb)
+(r3 = prob_t/prob_gumb)
+#The 99th percentile is:
+(u = qlnorm(0.99,0,1))
+
+# The probabilites of exceeding both thresholds:
+(prob_gauss.a = 1- pMvdc(c(u,u), Gauss))
+(prob_t.b = 1- pMvdc(c(u,u), t_cop))
+(prob_gumb.c =1- pMvdc(c(u,u), gumb))
+
+(r1a = prob_gauss/prob_t)
+(r2b = prob_gauss/prob_gumb)
+(r3c = prob_t/prob_gumb)
+
+# t-copula
+loss = rMvdc(10000, t_cop)
+loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
+loss = rowSums(loss)
+(E.t = mean(loss))
+
+# Gauss
+loss = rMvdc(10000, Gauss)
+loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
+loss = rowSums(loss)
+(E.Gauss = mean(loss))
+
+# Gumble
+loss = rMvdc(10000, gumb)
+loss[which(loss[,1] <= u & loss[,2] <= u), ] <- 0
+loss = rowSums(loss)
+(E.gumb = mean(loss))
+
+
+par(mfrow= c(1,3))
+u = qlnorm(0.95,0,1)
+
+loss = rMvdc(100000, Gauss)
+tail.gauss = loss[apply(loss > u, 1, all), ]
+plot(tail.gauss,ylim=c(0,100), xlim=c(0,100))
+
+loss = rMvdc(100000, gumb)
+tail.gumb = loss[apply(loss > u, 1, all), ]
+plot(tail.gumb,ylim=c(0,100), xlim=c(0,100))
+
+loss = rMvdc(100000, t_cop)
+tail.t_cop = loss[apply(loss > u, 1, all), ]
+plot(tail.t_cop,ylim=c(0,100), xlim=c(0,100))
+```
+
+# Exercise 9
+# library(fitdistrplus)
+# #Load data
+# ins.data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
+# plot(ins.data[,1], ins.data[,2], log="xy")
+# cor9 = cor(ins.data[,1], ins.data[,2])
+# 
+# #First margin (of log(data))
+# 
+# par(mfrow= c(2,1))
+# hist(ins.data[,1], breaks=60)
+# margin1 = mledist(ins.data[,1], "lnorm")
+# margin1$estimate
+# 
+# test1 = rlnorm(length(ins.data[,1]),margin1$estimate[1], margin1$estimate[2])
+# hist(test1, breaks=100)
+# 
+# #Second margin:
+# 
+# hist(ins.data[,2], breaks=500)
+# margin2 = mledist(ins.data[,2], "lnorm")
+# margin2$estimate
+# 
+# test2 =rlnorm(length(ins.data[,1]),margin2$estimate[1], margin2$estimate[2])
+# hist(test2, breaks=500)
+# 
+# #Create/test a copulas:
+# cop1 =  mvdc(archmCopula("gumbel",2 ), margins=c("lnorm", "lnorm"), paramMargins=list(list(mean=margin1$estimate[1],sd=margin1$estimate[2]), list(mean=margin2$estimate[1],sd=margin2$estimate[2])))#FML
+# #Create starting point (b stands for margin params, a stands for copula params)
+# loglikMvdc(start, ins.data, cop1)
+# mm <- apply(log(ins.data), 2, mean)
+# vv <- apply(log(ins.data), 2, var)
+# (b1.0 <-c(mm[1],vv[1]))
+# (b2.0 <- c(mm[2],vv[2]))
+# (a.0 <- sin(cor(dat[, 1], dat[, 2], method = "kendall") * pi/2))
+# start <- c(b1.0, b2.0, a.0,2)
+# fit <- fitMvdc(ins.data, cop1, start = start, optim.control = list(trace = TRUE, maxit = 2000))
+
+```
+
+```{r Exercise 9 FML test 2}
+# library(fitdistrplus)
+# #Load data
+# ins.data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
+# plot(ins.data[,1], ins.data[,2], log="xy")
+# cor9 = cor(ins.data[,1], ins.data[,2])
+# dat = log(ins.data)
+# 
+# #First margin (of log(data))
+# 
+# par(mfrow= c(2,1))
+# hist(dat[,1], breaks=60)
+# margin1 = mledist(dat[,1], "norm")
+# margin1$estimate
+# 
+# test1 = rnorm(length(dat[,1]),margin1$estimate[1], margin1$estimate[2])
+# hist(test1, breaks=100)
+# 
+# #Second margin:
+# 
+# hist(dat[,2], breaks=500)
+# margin2 = mledist(dat[,2], "norm")
+# margin2$estimate
+# 
+# test2 =rnorm(length(ins.data[,1]),margin2$estimate[1], margin2$estimate[2])
+# hist(test2, breaks=500)
+# 
+# #Create/test a copulas:
+# cop1 =  mvdc(archmCopula("gumbel",3 ), margins=c("norm", "norm"), paramMargins=list(list(mean=margin1$estimate[1],sd=margin1$estimate[2]), list(mean=margin2$estimate[1],sd=margin2$estimate[2])))
+# #FML
+# #Create starting point (b stands for margin params, a stands for copula params)
+# 
+# start2=c(margin1$estimate[1], margin1$estimate[2],margin2$estimate[1], margin2$estimate[2],0.5)
+# loglikMvdc(start, dat, cop1)
+# mm <- apply(dat, 2, mean)
+# vv <- apply(dat, 2, var)
+# (b1.0 <-c(mm[1],vv[1]))
+# (b2.0 <- c(mm[2],vv[2]))
+# (a.0 <- 1/(1-cor(dat[, 1], dat[, 2], method = "kendall")))
+# start <- c(b1.0, b2.0, a.0)
+# fit <- fitMvdc(dat, cop1, start = start, optim.control = list(trace = TRUE, maxit = 2000))
+
+```
+
+
+
+
+
+
+
+
+
+
