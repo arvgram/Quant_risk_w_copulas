@@ -56,10 +56,23 @@ plot(sim4)
 (cor(sim3[,1],sim3[,2], method = "spearman"))
 (cor(sim4[,1],sim4[,2], method = "spearman"))
 
-
-
 ```
 \newpage
+For the bivariate cases we have:
+\begin{itemize}
+    \item Bivariate Extreme Value Logistic Copula: dependence parameter $r \geq 1$. 
+    \item Bivariate Extreme Value Asymmetric Logistic Copula dependence parameter $r \leq 1$, asymmetry parameters $\theta, \phi \in [0,1]$. If both are $1$ then this is a symmetric logistic.
+    \item Bivariate Extreme Value Mixed Model Copula: parameter $0\leq\theta\leq1$
+    \item Bivariate Extreme Value Asymmetric Mixed Model Copula: parameters $\theta, \phi$. These fulfill the following conditions, $\theta \geq 0$, $\theta + 3\phi \geq 0$, $\theta+\phi \leq 1$, $\theta + 2\phi \leq 1$.
+    \item Bivariate Extreme Value Spline Copula. Parameter: a spline function for the dependence function. 
+\end{itemize}
+As for the multivariate copulas we have
+\begin{itemize}
+    \item Multivariate Extreme Value Asymmetric Logistic Copula: $\mathbf{\theta}$, matrix with asymmetry parameters. $\mathbf{r}$, vector with dependency parameters. Terms and conditions apply. 
+    \item Multivariate Extreme Value Gumbel Copula. Dependence parameter $r \geq 1$.
+    \item Multivariate Clayton Copula. Dependence parameter $\theta > 0$ 
+    \item Multivariate Frank Copula. Parameter $\alpha > 0$
+\end{itemize}
 \subsection{Exercise 2.4}
 ```{r Exercise 2.4}
 cop1 = NewBEVAsyLogisticCopula(2, 1, 0.5)
