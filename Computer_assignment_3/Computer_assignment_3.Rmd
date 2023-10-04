@@ -1,0 +1,23 @@
+---
+title: "Assignment3"
+author: "Anton Linnér"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(evd)
+library(SimCop)
+library(copula)
+```
+
+## R Markdown
+```{r cars}
+summary(cars)
+```
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
