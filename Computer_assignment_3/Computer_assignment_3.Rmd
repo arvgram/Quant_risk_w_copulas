@@ -12,12 +12,21 @@ library(SimCop)
 library(copula)
 ```
 
-## R Markdown
-```{r cars}
-summary(cars)
+\\section(Random number generation from bivariate EVD) \\subsection(Parametric bivariate EV models) In the package \texttt{evd} the nine models and their respective dependence and asymmetry parameters are:
+
+```{=tex}
+\begin{itemize}
+    \item Logistic. Dependence parameter \texttt{r} between (0,1]. Smaller \texttt{r} implies higher dependence.
+    \item Asymmetrix logistic. Dependence parameter r, as in (symmetric) Logistic. Asymmetry parameters are \texttt{t_1} and \texttt{t_2}. Indepence if any of \texttt{t_1, t_2} are 0 or \texttt{r = 1}. For complete dependence \texttt{t_1}=\texttt{t_2}=1 and \texttt{r} $\leftarrow 0$.
+    \item Husler-Reiss. Dependence parameter \texttt{r} $\in (0, \inf)$. Full dependence as \texttt{r} $\leftarrow \inf$, and independence as $\texttt{r} \leftarrow 0$
+    \item Negative logistic. Dependence parameter \texttt{r} $>0$. Higher \texttt{r} implies higher dependence. 
+    \item Asymmetric negative logistic. Dependence parameter $\texttt{r}>0$ and asymmetry parameters \texttt{t_1, t_2} $\in (0, 1]$. Indepence if any of \texttt{t_1, t_2, r} approaches 0. Complete dependence if \texttt{t_1, t_2} = 1,1 and \texttt{r} $\leftarrow \inf$.
+    \item Bilogistic. Parameters $\alpha, \beta$. When $\alpha = \beta$ the model is equivalent to logistic with dependence parameter \texttt{r} $=\alpha$. As in logistic, when $\alpha = \beta = $ \texttt{r} $\leftarrow 0$ the model tends to complete dependence. Independence as either both tends to 1, or one is fix and other tends to 1.
+    \item Negative bilogistic Parameters $\alpha, \beta$. When $\alpha = \beta$ the model is equivalent to negative bilogistic with dependence parameter \texttt{r} $=1\alpha$. When $\alpha = \beta $\leftarrow 0$ the model tends to complete dependence. Independence as either both tends to $\inf$, or one is fix and other tends to $\inf$.
+    \item Coles-Tawn. Parameters $\alpha, \beta > (0,0)$. As $\alpha = \beta \leftarrow \inf$ the model shows complete dependence. Independence as either both tends to 0, or one is fix and other tends to 0.
+    \item Asymmetric mixed distribution. Parameters $\alpha, \beta$ fulfill the following conditions: $\alpha$ and $\alpha + 3 \beta > 0$, and $\alpha + 2\beta$, $\alpha + \beta \leq 1$ As $\beta$ is fix, the strength of dependence increases with $\alpha$. Complete dependence is not achievable. Independence as $\alpha = \beta = 0$.
+  \end{itemize}
 ```
+```{r }
 
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
