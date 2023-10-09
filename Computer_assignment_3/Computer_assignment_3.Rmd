@@ -75,14 +75,268 @@ As for the multivariate copulas we have
 \end{itemize}
 \subsection{Exercise 2.4}
 ```{r Exercise 2.4}
+par(mfrow=c(3,2))
+cop1 = NewBEVAsyLogisticCopula(2, 200, 0.5)
+approxcop1 = GetApprox(cop1)
+RV1 = GenerateRV(approxcop1, 200)
+plot(RV1)
+
+cop1 = NewBEVAsyLogisticCopula(20, 0.5, 0.5)
+approxcop1 = GetApprox(cop1)
+RV1 = GenerateRV(approxcop1, 200)
+plot(RV1)
+
+cop1 = NewBEVAsyLogisticCopula(2, 0.5, 0.5)
+approxcop1 = GetApprox(cop1)
+RV1 = GenerateRV(approxcop1, 200)
+plot(RV1)
+
 cop1 = NewBEVAsyLogisticCopula(2, 1, 0.5)
 approxcop1 = GetApprox(cop1)
 RV1 = GenerateRV(approxcop1, 200)
 plot(RV1)
 
-cop1 = NewBEVAsyLogisticCopula(10, 2, 1)
+cop1 = NewBEVAsyLogisticCopula(2, 0.5, 0.5)
+approxcop1 = GetApprox(cop1)
+RV1 = GenerateRV(approxcop1, 200)
+plot(RV1)
+
+cop1 = NewBEVAsyLogisticCopula(2, 0.5, 1)
 approxcop1 = GetApprox(cop1)
 RV1 = GenerateRV(approxcop1, 200)
 plot(RV1)
 
 ```
+
+\section{Exercise 3}
+```{r data}
+fre = source("https://www.maths.lth.se/matstat/kurser/fmsn15masm23/datasets/fremantle.R")
+port = source("https://www.maths.lth.se/matstat/kurser/fmsn15masm23/datasets/portpirie.R")
+```
+
+\subsection{Exercise 3.1}
+
+```{r Exercise 3.1}
+fre.years = fre$value$Year
+port.years = port$value$Year
+```
+
+```{r Exercise 3.2}
+tot.years = merge(x = fre$value,y = port$value, by = "Year")
+tot.years = tot.years[,-1]
+tot.years = tot.years[,-2]
+ 
+```
+
+```{r Exercise 3.3}
+library(fitdistrplus)
+par(mfrow=c(1,1))
+plot(tot.years$SeaLevel.x, tot.years$SeaLevel.y, xlab = "Fremantle max sea level", ylab = "Portpirie max sea level", main="Annual max sea level scatter plot")
+```
+```{r Exercise 3.4 Parametric}
+par(mfrow=c(2,1))
+#FML:
+#aneglog
+ml.fml1 = fbvevd(tot.years, model = c("aneglog"))
+#Hr
+ml.fml2 = fbvevd(tot.years, model = c("hr"))
+
+#IFM
+start1 = list(loc=1, scale = 0, shape = 1)
+start2 = list(loc = 3,scale=3,shape = 1)
+
+marg.fit1 = mledist(tot.years[,1], "gev", start = start)$est
+marg.fit2 = mledist(tot.years[,2], "gev", start = start)$est
+
+#IFM for aneglog
+(ml.ifm1 = fbvevd(tot.years, model= c("aneglog"), loc1 = marg.fit1["loc"], scale1 = marg.fit1["scale"], shape1=marg.fit1["shape"],loc2 = marg.fit2["loc"], scale2 = marg.fit2["scale"], shape2=marg.fit2["shape"]))
+#IFM for Hr
+(ml.ifm2 = fbvevd(tot.years, model= c("hr"), loc1 = marg.fit1["loc"], scale1 = marg.fit1["scale"], shape1=marg.fit1["shape"],loc2 = marg.fit2["loc"], scale2 = marg.fit2["scale"], shape2=marg.fit2["shape"]))
+
+```
+
+```{r 3.5 Non-parametric}
+nonpar.gev = abvnonpar(data = tot.years, plot = TRUE)
+nonpar.emp = abvnonpar(data = tot.years, plot = TRUE, epmar = TRUE) #Can see that non-empircal transformation shows more indep. 
+
+```
+
+```{r 3.6 Estimates probabilities}
+#We have different calcs for A. 
+
+#PARAMETRIC
+# a) Asymmetric FML
+mar1 = c( ml.fml1$estimate["loc1"],  ml.fml1$estimate["scale1"],  ml.fml1$estimate["shape1"])
+mar2 = c( ml.fml1$estimate["loc2"],  ml.fml1$estimate["scale2"],  ml.fml1$estimate["shape2"])
+dep =  ml.fml1$estimate["dep"]
+asy = c( ml.fml1$estimate["asy1"], ml.fml1$estimate["asy2"])
+(prob1 = pbvevd(c(1.7,4.2), dep = dep, asy = asy, mar1=mar1, mar2=mar2, model = c("aneglog"), lower.tail = FALSE))
+(prob2 = pbvevd(c(1.8,4.4), dep = dep, asy = asy, mar1=mar1, mar2=mar2, model = c("aneglog"), lower.tail = FALSE))
+(prob3 = 1 - pbvevd(c(1.478,3.850), dep = dep, asy = asy, mar1=mar1, mar2=mar2, model = c("aneglog")))
+
+mar1 = c( ml.fml2$estimate["loc1"],  ml.fml2$estimate["scale1"],  ml.fml2$estimate["shape1"])
+mar2 = c( ml.fml2$estimate["loc2"],  ml.fml2$estimate["scale2"],  ml.fml2$estimate["shape2"])
+dep =  ml.fml2$estimate["dep"]
+(prob1.sym = pbvevd(c(1.7,4.2), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE))
+(prob2.sym = pbvevd(c(1.8,4.4), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE))
+(prob3.sym = 1- pbvevd(c(1.478,3.850), dep = dep, mar1=mar1, mar2=mar2, model = c("hr")))
+
+```
+
+
+```{r empirical probs}
+prob1.emp <- as.numeric(tot.years$SeaLevel.x > 1.7 & tot.years$SeaLevel.y > 4.2)
+(prob1.emp = sum(prob1.emp)/length(prob1.emp))
+
+prob2.emp <- as.numeric(tot.years$SeaLevel.x > 1.8 & tot.years$SeaLevel.y > 4.4)
+(prob2.emp = sum(prob2.emp)/length(prob2.emp))
+
+
+prob3.emp <- as.numeric(tot.years$SeaLevel.x >=  1.478 | tot.years$SeaLevel.y >= 3.850)
+(prob3.emp = sum(prob3.emp)/length(prob3.emp))
+```
+
+```{r non-parametric}
+G_star <- function(x,y){
+  val = exp(-(1/x + 1/y)*abvnonpar(x=x/(x+y), data=tot.years ))
+  return(val)
+}
+
+transform <- function(x, mar){
+  mar1 = mar
+  x.t = c((1+mar1[3]*(x-mar1[1])/mar1[2])^(1/mar1[3]), use.names=FALSE) 
+return(x.t)}
+
+#WHAT MARGIN PARAMS SHOULD I USE HERE?
+#aYBE
+
+
+#1.7 and 4.2
+x.t = transform(1.7, mar1)
+y.t = transform(4.2, marg.fit2)
+(prob1.nonpar = 1 - pgev(1.7, loc=mar1[1], scale=mar1[2], shape = mar1[3]) - pgev(4.2, loc=mar2[1], scale=mar2[2], shape = mar2[3]) + G_star(x.t, y.t))
+
+#1.8 and 4.4
+x.t = transform(1.8,  mar1)
+y.t = transform(4.4,  mar2)
+(prob2.nonpar = 1 - pgev(1.8, loc=mar1[1], scale=mar1[2], shape = mar1[3]) - pgev(4.4, loc=mar2[1], scale=mar2[2], shape = mar2[3]) + G_star(x.t, y.t))
+
+#1.478 and 3.850
+x.t = transform(1.478, mar1)
+y.t = transform(3.850,  mar2)
+(prob3.nonpar = 1 - G_star(x.t, y.t))
+```
+
+
+```{r 3.7}
+
+#By using bayes relation betweenn conditional probabilities we get:
+#Non.par
+x.t1 = transform(1.478, mar1)
+y.t1 = transform(3.850, mar2)
+x.t2 = transform(1.95, mar1)
+y.t2 = transform(4.8, mar2)
+(prob1 = ((1 - G_star(x.t1, y.t1)) - (1 - G_star(1.95, 4.8)))/ (1 - G_star(x.t1, y.t1)))
+
+#par (symmetric)
+x.t1 = transform(1.478, mar1)
+y.t1 = transform(3.850, mar2)
+x.t2 = transform(1.95, mar1)
+y.t2 = transform(4.8, mar2)
+(prob1 =  (pbvevd(c(1.478,3.850), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE) -  (pbvevd(c(1.95,4.8), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE))/pbvevd(c(1.478,3.850), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE)))
+```
+
+```{r plotting}
+par(mfrow=c(2,2))
+ml.fml2 = fbvevd(tot.years, model = c("hr"))
+plot(ml.ifm2, which=1:5)
+qcbvnonpar(data = tot.years, plot=TRUE)
+qcbvnonpar(data = tot.years, plot=TRUE, epmar = TRUE)
+
+```
+
+```{r 3.9 }
+tot.years = merge(x = fre$value,y = port$value, by = "Year")
+
+
+# min and max
+minv <- min(tot.years["Year"])
+maxv <- max(tot.years["Year"])
+
+# Normalize to [-1, 1]
+tot.years["Year"] <- ((tot.years["Year"] - minv) / (maxv - minv)) * 2 - 1
+
+x_dat = tot.years[-1]
+x_dat = x_dat[-2]
+
+#Test bitg
+ml.fml1.2 = fbvevd(x_dat, model = c("aneglog"),nsloc1 =tot.years["Year"],nsloc2 =tot.years["SOI"])
+#Hr
+ml.fml2.2 = fbvevd(x_dat, model = c("hr"), nsloc1 =tot.years["Year"],nsloc2 =tot.years["SOI"])
+anova(ml.fml1.2, ml.fml1)
+
+(A <- logLik(ml.fml1))
+(B<- logLik(ml.fml1.2))
+
+(stat <- -2 * (as.numeric(A)-as.numeric(B)))
+(p.val <- pchisq(stat, df = 2, lower.tail = FALSE)) #under 0.05 we should use the complex model ( reject null)
+
+
+(A <- logLik(ml.fml2))
+(B<- logLik(ml.fml2.2))
+
+(stat <- -2 * (as.numeric(A)-as.numeric(B)))
+(p.val <- pchisq(stat, df = 2, lower.tail = FALSE)) #under 0.05 we should use the complex model ( reject null)
+
+#Test "YEAR" ----------------------------
+
+ml.fml1.2 = fbvevd(x_dat, model = c("aneglog"),nsloc1 =tot.years["Year"])
+#Hr
+ml.fml2.2 = fbvevd(x_dat, model = c("hr"), nsloc1 =tot.years["Year"])
+
+(A <- logLik(ml.fml1))
+(B<- logLik(ml.fml1.2))
+
+(stat <- -2 * (as.numeric(A)-as.numeric(B)))
+(p.val <- pchisq(stat, df = 1, lower.tail = FALSE)) #under 0.05 we should use the complex model ( reject null)
+
+
+(A <- logLik(ml.fml2))
+(B<- logLik(ml.fml2.2))
+
+(stat <- -2 * (as.numeric(A)-as.numeric(B)))
+(p.val <- pchisq(stat, df = 1, lower.tail = FALSE)) #under 0.05 we should use the complex model ( reject null)
+
+
+
+#Test SOI ---------------------------------------
+ml.fml1.2 = fbvevd(x_dat, model = c("aneglog"),nsloc1 =tot.years["SOI"])
+#Hr
+ml.fml2.2 = fbvevd(x_dat, model = c("hr"), nsloc1 =tot.years["SOI"])
+
+(A <- logLik(ml.fml1))
+(B<- logLik(ml.fml1.2))
+
+(stat <- -2 * (as.numeric(A)-as.numeric(B)))
+(p.val <- pchisq(stat, df = 1, lower.tail = FALSE)) #under 0.05 we should use the complex model ( reject null)
+
+
+(A <- logLik(ml.fml2))
+(B<- logLik(ml.fml2.2))
+
+(stat <- -2 * (as.numeric(A)-as.numeric(B)))
+(p.val <- pchisq(stat, df = 1, lower.tail = FALSE))
+
+
+#Conclusion, SOI is statisctically significant!
+```
+
+
+
+
+
+
+
+
+
+
