@@ -11,8 +11,27 @@ library(evd)
 library(SimCop)
 library(copula)
 ```
-
-\\section(Random number generation from bivariate EVD) \\subsection(Parametric bivariate EV models) In the package \texttt{evd} the nine models and their respective dependence and asymmetry parameters are:
+\section(Theoretical questions)
+  \begin{enumerate}
+    \item The characterization of the BEVD with unit Fréchet margins ()$G_{*}(x,y) = \mathrm{exp}(-(\frac{1}{x}+\frac{1}{y})A(\frac{x}{x+y}))$ where $A$ is dependence function. For this function it holds that $(G_*(tx,ty))^t = G_*(x,y)$ which makes it max-stable.
+    \item The dependence function $A(\omega)$ fulfills the following properties:
+    \begin{itemize}
+        \item $A(0) = 1$
+        \item $A(1) = 1$
+        \item $A'(1) \geq 1$
+        \item $A'(0) \geq -1$
+        \item $A$ is convex
+    \end{itemize}
+    \item The formula for extreme value copulas is $C(u,v) = (uv)^{A\left(\frac{\log u}{\log uv}\right)}$. Some examples of these are (with $\tilde{u}-\log(u), \tilde{v}=-\log(v)$
+    \begin{itemize}
+        \item Gumbel copula: $C(u,v) = \exp\left(-(\tilde{u}^\delta +\tilde{v}^\delta)^{1/\delta}\right)$
+        \item Galambos copula: $C(u,v) = uv\exp(-(\tilde{u}^{-\delta} +\tilde{v}^{-\delta})^{-1/\delta})$
+        \item Hüsler-Reiss copula: $C(u,v) = \exp\left(-\tilde{u}\Phi\left(\frac{1}{\theta} + \frac{\theta}{2}\log(\frac{\tilde{u}}{\tilde{v}})\right)-\tilde{v}\Phi\left(\frac{1}{\theta} + \frac{\theta}{2}\log(\frac{\tilde{u}}{\tilde{v}})\right)\right)$, where $\Phi$ is the standard normal cumulative distribution function. 
+    \end{itemize} Any copula that satisfies $C(u,v)^t = C(u^t, v^t)$ is an extreme value copula, and we can thus check that a given copula fulfills this condition to see if it is an extreme value copula.
+    \item If we want to create a bivariate extreme value distribution with our choice of arbitrary univariate extreme value margins we can use the extreme value copula and insert $(u, v) = (F_1^{\leftarrow}(x), F_2^{\leftarrow}(y))$, where $F^{\leftarrow}$ is the generalised inverse ($F^{\leftarrow}(t) = \inf\{x: t < F(x)\}$) of the distribution function we want to have as our margins. The distribution  by $C(F_1^{\leftarrow}(x), F_2^{\leftarrow}(y))$ will have the wanted properties.
+    \item 
+\end{enumerate}
+\section(Random number generation from bivariate EVD) \subsection(Parametric bivariate EV models) In the package \texttt{evd} the nine models and their respective dependence and asymmetry parameters are:
 
 
 \begin{itemize}
