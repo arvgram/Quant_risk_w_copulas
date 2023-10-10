@@ -142,11 +142,11 @@ ml.fml1 = fbvevd(tot.years, model = c("aneglog"))
 ml.fml2 = fbvevd(tot.years, model = c("hr"))
 
 #IFM
-start1 = list(loc=1, scale = 0, shape = 1)
+start1 = list(loc=1, scale = 1, shape = 1)
 start2 = list(loc = 3,scale=3,shape = 1)
 
-marg.fit1 = mledist(tot.years[,1], "gev", start = start)$est
-marg.fit2 = mledist(tot.years[,2], "gev", start = start)$est
+marg.fit1 = mledist(tot.years[,1], "gev", start = start1)$est
+marg.fit2 = mledist(tot.years[,2], "gev", start = start2)$est
 
 #IFM for aneglog
 (ml.ifm1 = fbvevd(tot.years, model= c("aneglog"), loc1 = marg.fit1["loc"], scale1 = marg.fit1["scale"], shape1=marg.fit1["shape"],loc2 = marg.fit2["loc"], scale2 = marg.fit2["scale"], shape2=marg.fit2["shape"]))
@@ -170,8 +170,11 @@ mar1 = c( ml.fml1$estimate["loc1"],  ml.fml1$estimate["scale1"],  ml.fml1$estima
 mar2 = c( ml.fml1$estimate["loc2"],  ml.fml1$estimate["scale2"],  ml.fml1$estimate["shape2"])
 dep =  ml.fml1$estimate["dep"]
 asy = c( ml.fml1$estimate["asy1"], ml.fml1$estimate["asy2"])
-(prob1 = pbvevd(c(1.7,4.2), dep = dep, asy = asy, mar1=mar1, mar2=mar2, model = c("aneglog"), lower.tail = FALSE))
+
+(prob1 = pbvevd(c(1.7,4.2), dep = dep, asy = asy, mar1=mar1, mar2=mar2, model = c("aneglog"), lower.tail = FALSE)) 
+
 (prob2 = pbvevd(c(1.8,4.4), dep = dep, asy = asy, mar1=mar1, mar2=mar2, model = c("aneglog"), lower.tail = FALSE))
+
 (prob3 = 1 - pbvevd(c(1.478,3.850), dep = dep, asy = asy, mar1=mar1, mar2=mar2, model = c("aneglog")))
 
 mar1 = c( ml.fml2$estimate["loc1"],  ml.fml2$estimate["scale1"],  ml.fml2$estimate["shape1"])
@@ -213,7 +216,7 @@ return(x.t)}
 
 #1.7 and 4.2
 x.t = transform(1.7, mar1)
-y.t = transform(4.2, marg.fit2)
+y.t = transform(4.2, mar2)
 (prob1.nonpar = 1 - pgev(1.7, loc=mar1[1], scale=mar1[2], shape = mar1[3]) - pgev(4.2, loc=mar2[1], scale=mar2[2], shape = mar2[3]) + G_star(x.t, y.t))
 
 #1.8 and 4.4
@@ -246,13 +249,12 @@ y.t2 = transform(4.8, mar2)
 (prob1 =  (pbvevd(c(1.478,3.850), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE) -  (pbvevd(c(1.95,4.8), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE))/pbvevd(c(1.478,3.850), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE)))
 ```
 
-```{r plotting}
+```{r 3.8 plotting}
 par(mfrow=c(2,2))
 ml.fml2 = fbvevd(tot.years, model = c("hr"))
-plot(ml.ifm2, which=1:5)
+plot(ml.fml2, which=5, p=c(0.75, 0.9, 0.95))
 qcbvnonpar(data = tot.years, plot=TRUE)
 qcbvnonpar(data = tot.years, plot=TRUE, epmar = TRUE)
-
 ```
 
 ```{r 3.9 }
@@ -330,6 +332,154 @@ ml.fml2.2 = fbvevd(x_dat, model = c("hr"), nsloc1 =tot.years["SOI"])
 
 #Conclusion, SOI is statisctically significant!
 ```
+
+```{r Exercise 4}
+#Get margins to use in FML
+marg.fit1 = mledist(tot.years[,1], "gev", start = start)$est
+marg.fit2 = mledist(tot.years[,2], "gev", start = start)$est
+
+#Get some tau
+tau = 0.2
+
+#Copulas
+gumbel.cop <- gumbelCopula(iTau(gumbelCopula(), tau))
+galambos.cop <- galambosCopula (iTau(galambosCopula(), tau))
+hr.cop <-huslerReissCopula(iTau(huslerReissCopula(), tau))
+# Can this be canonical method?
+
+gumb.fit = fitCopula(gumbel.cop, data = pobs(tot.years))
+galamb.fit = fitCopula(galambos.cop, data = pobs(tot.years))
+hr.fit = fitCopula(hr.cop, data = pobs(tot.years))
+
+#help
+gumb.mvdc = mvdc(gumbel.cop, margins = c("gev", "gev") , paramMargins = list(list(loc=marg.fit1[1], scale = marg.fit1[2], shape=marg.fit1[3]),list(loc=marg.fit2[1], scale = marg.fit2[2], shape=marg.fit2[3])))
+
+param= c(1,1,1,1,1,1,1)
+param = c(marg.fit1, marg.fit2, 0.2, use.names = FALSE)
+
+(gumb.mvdc.fit = fitMvdc(as.matrix(tot.years), mvdc = gumb.mvdc, start=param, method = "Nelder"))
+
+gumb.mvdc = mvdc(gumbel.cop, margins = c("gev", "gev") , paramMargins = list(list(loc=marg.fit1[1], scale = marg.fit1[2], shape=marg.fit1[3]),list(loc=marg.fit2[1], scale = marg.fit2[2], shape=marg.fit2[3])))
+
+
+#Regular EV dists. 
+(ml.neglog = fbvevd(tot.years, model= c("neglog")))
+(ml.log = fbvevd(tot.years, model= c("log")))
+(ml.hr = fbvevd(tot.years, model= c("hr") ))
+
+(ml.neglog2 = fbvevd(tot.years, model= c("neglog"), method = c("ml")))
+(ml.log2 = fbvevd(tot.years, model= c("log")))
+(ml.hr2 = fbvevd(tot.years, model= c("hr") ))
+```
+
+```{r start with ranking data}
+tot.years[1] = rank(tot.years$SeaLevel.x)
+tot.years[2] = rank(tot.years$SeaLevel.y)
+#Emp dist func evald at 12
+emp.dist = function(data, point){
+  val = sum(data < point)/(length(data)+1)
+return(val)}
+
+```
+
+```{r exercise 4.3}
+gof1 = gofEVCopula(gumb.fit@copula, as.matrix(tot.years))
+
+gof2 = gofEVCopula(galamb.fit@copula, as.matrix(tot.years))
+
+gof3 = gofEVCopula(hr.fit@copula, as.matrix(tot.years))
+
+
+```
+
+```{r exercise 4.4}
+w = seq(0,1, by=0.01)
+cfg = An.biv(tot.years, w, estimator=c("CFG"))
+pickands =  An.biv(tot.years, w, estimator=c("Pickands"))
+
+par(mfrow=c(2,1))
+plot(cfg)
+plot(pickands)
+```
+
+```{r Exercise 4.5}
+#Parametric
+
+
+```
+
+
+\newline
+\section{Exercise 5}
+
+We see that we don't force convexity the result plot is not convex. How ever, enforcing convexity only leaves 13 points withing the hull.
+
+```{r exercise 5.1}
+A1 = NonparEstDepFct(tot.years$SeaLevel.x, y=tot.years$SeaLevel.y)
+A2 = NonparEstDepFct(tot.years$SeaLevel.x, y=tot.years$SeaLevel.y, convex.hull = FALSE )
+par(mfrow=c(2,1))
+plot(A1)
+plot(A2)
+```
+
+```{r Exercise 5.2}
+## Data from Hall and Tajvidi (2004, ANZJS)
+Estim1 <- NonparEstDepFct(x=tot.years$SeaLevel.x, y= tot.years$SeaLevel.y, convex = TRUE)
+
+## Plot modified Pickands Function and area in which
+## dependence function must lie
+plot(Estim1, ylim = c(0.5,1), xlab = "w", ylab = "A(w)", type="l", lty="longdash")
+polygon(c(0, 0.5, 1, 0), c(1, 0.5, 1, 1))
+
+## Fit spline to Pickands function and add to plot
+spline.fit <- SplineFitDepFct(Estim1)
+curve(spline.fit, n = 301, add = TRUE, lty = "dashed")
+
+```
+
+```{r Exercise 5.3}
+
+spline.cop = NewBEVSplineCopula(spline.fit)
+spline.cop.approx = GetApprox(spline.cop)
+plot(spline.cop.approx)
+
+```
+
+```{r Exercise 5.4}
+RVs = GenerateRV(spline.cop.approx, 1000)
+prob1.emp <- as.numeric(RVs[,1] > 1.7 & RVs[,2] > 4.2)
+(prob1.emp = sum(prob1.emp)/length(prob1.emp))
+```
+
+```{r Exercise 6 type 1}
+u1 = quantile(tot.years[,1], probs = 0.30)
+u2 = quantile(tot.years[,2], probs = 0.30)
+
+mod.sym = fbvpot(tot.years, threshold = c(u1,u2), model = c("log"))
+
+mod.asym =  fbvpot(tot.years, threshold = c(u1,u2), model = c("aneglog"), std.err=FALSE)
+plot(mod.sym, p=c(0.75,0.9,0.95), which = 3)
+plot(mod.asym, p=c(0.75,0.9,0.95), which = 3)
+#Very similar, kinda agree with 3.8
+```
+
+```{r exercise 6.4}
+
+mtransform()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
