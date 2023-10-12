@@ -1,0 +1,39 @@
+# Exercise 5 ####
+par(mfrow = c(1,2))
+library(SimCop)
+slNonparEst <- NonparEstDepFct(sl, convex = FALSE)
+plot(slNonparEst, ylim = c(0.5,1), xlab = "w", ylab = "A(w)", type = "l", lty = "longdash")
+polygon(c(0,0.5,1,0), c(1,0.5,1,1))
+title("convex = FALSE")
+
+slNonparEstConvex <- NonparEstDepFct(sl, convex = TRUE)
+plot(slNonparEstConvex, ylim = c(0.5,1), xlab = "w", ylab = "A(w)", type = "l", lty = "longdash")
+polygon(c(0,0.5,1,0), c(1,0.5,1,1))
+title("convex = TRUE")
+
+par(mfrow = c(1,1))
+slSplfit <- SplineFitDepFct(slNonparEst)
+plot(slSplfit, ylim = c(0.5,1), xlab = "w", ylab = "A(w)", type = "l", lty = "longdash")
+polygon(c(0,0.5,1,0), c(1,0.5,1,1))
+curve(slSplfit, n = 301, add = TRUE, lty = "dashed", col = 3)
+title("Smoothing spline fit")
+
+slSplfitCop <- NewBEVSplineCopula(slSplfit)
+slSplfitCopApprox1 <- GetApprox(slSplfitCop, type = "1")
+plot(slSplfitCopApprox1)
+plot(slSplfitCopApprox1, type = "o")
+title("Copula for smoothing spline fit")
+
+sample1 <- GenerateRV(slSplfitCopApprox1, 1000)
+plot(sample1)
+
+# Calculate probabilities by transforming copula samples to X and Y
+quantile_X <- qgev(sample1[, 1], loc = f1$estimate[1], scale = f1$estimate[2], shape = f1$estimate[3])
+quantile_Y <- qgev(sample1[, 2], loc = f2$estimate[1], scale = f2$estimate[2], shape = f2$estimate[3])
+prob_1 <- mean(quantile_X > 1.7 & quantile_Y > 4.2)
+prob_2 <- mean(quantile_X > 1.8 & quantile_Y > 4.4)
+prob_3 <- 1 - mean(quantile_X < 1.478 & quantile_Y < 3.850)
+
+p1 <- mean(quantile_X < 1.95 & quantile_Y < 4.8)
+p2 <- mean(quantile_X < 1.478 & quantile_Y < 3.850)
+prob_4 <- (p1 - p2)/(1 - p2)
