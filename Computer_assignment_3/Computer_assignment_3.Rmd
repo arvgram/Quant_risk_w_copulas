@@ -29,11 +29,19 @@ library(copula)
         \item Hüsler-Reiss copula: $C(u,v) = \exp\left(-\tilde{u}\Phi\left(\frac{1}{\theta} + \frac{\theta}{2}\log(\frac{\tilde{u}}{\tilde{v}})\right)-\tilde{v}\Phi\left(\frac{1}{\theta} + \frac{\theta}{2}\log(\frac{\tilde{u}}{\tilde{v}})\right)\right)$, where $\Phi$ is the standard normal cumulative distribution function. 
     \end{itemize} Any copula that satisfies $C(u,v)^t = C(u^t, v^t)$ is an extreme value copula, and we can thus check that a given copula fulfills this condition to see if it is an extreme value copula.
     \item If we want to create a bivariate extreme value distribution with our choice of arbitrary univariate extreme value margins we can use the extreme value copula and insert $(u, v) = (F_1^{\leftarrow}(x), F_2^{\leftarrow}(y))$, where $F^{\leftarrow}$ is the generalised inverse ($F^{\leftarrow}(t) = \inf\{x: t < F(x)\}$) of the distribution function we want to have as our margins. The distribution  by $C(F_1^{\leftarrow}(x), F_2^{\leftarrow}(y))$ will have the wanted properties.
-    \item 
+    \item To derive the formula for Pickand's estimator of the dependence function $A(\omega)$ we use that if $(X,Y) \sim (\mathrm{e}^{-1/x}, \mathrm{e}^{-1/y})$ then
+        \begin{equation}
+            P\left[\mathrm{min}\left(\frac{1}{(1-\omega)X},\frac{1}{\omega Y}\right)\geq z\right] = P\left[X\leq\frac{1}{(1-\omega)z},Y \leq \frac{1}{\omega z}\right] 
+        \end{equation}
+        Using that $x, y$ have unit Fréchet distribution we get that the probability is:
+        \begin{equation}
+            =\mathrm{exp}\left\{ -(z(1-\omega) + \omega z)\mathrm{A}\left(\frac{1/z(1+\omega)}{1/(z(1-\omega))+1/\omega z}\right)\right\} = \mathrm{e}^{-z\mathrm{A}(\omega)}
+        \end{equation}
+        We can thus estimate $A$ from our data by taking the bivariate samples $(x_i, y_i)$, $i = 1,...,n$ and computing $z_i(\omega) = \mathrm{min}\left(\frac{1}{(1-\omega)x_i},\frac{1}{\omega y_i}\right)$ and since we then have $P(z_i \leq z)$ = $\mathrm{e}^{-z\mathrm{A}(\omega)}$ an estimate of $A$ is \begin{equation}
+            \hat{A}(\omega) = \frac{n}{\sum_{i=1}^n(z_i(\omega))}
+        \end{equation}
 \end{enumerate}
 \section(Random number generation from bivariate EVD) \subsection(Parametric bivariate EV models) In the package \texttt{evd} the nine models and their respective dependence and asymmetry parameters are:
-
-
 \begin{itemize}
     \item Logistic. Dependence parameter $\texttt{r}$ between (0,1]. Smaller \texttt{r} implies higher dependence.
     \item Asymmetrix logistic. Dependence parameter r, as in (symmetric) Logistic. Asymmetry parameters are $\texttt{t}_1$ and $\texttt{t}_2$. Indepence if any of $\texttt{t}_1, \texttt{t}_2$ are 0 or $\texttt{r = 1}$. For complete dependence $\texttt{t}_1= \texttt{t}_2$=1 and $\texttt{r} \rightarrow 0$.
