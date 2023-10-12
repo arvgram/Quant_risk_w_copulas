@@ -26,7 +26,7 @@ library(copula)
     \item Coles-Tawn. Parameters $\alpha, \beta > (0,0)$. As $\alpha = \beta \rightarrow \infty$ the model shows complete dependence. Independence as either both tends to 0, or one is fix and other tends to 0.
     \item Asymmetric mixed distribution. Parameters $\alpha, \beta$ fulfill the following conditions: $\alpha$ and $\alpha + 3 \beta > 0$, and $\alpha + 2\beta$, $\alpha + \beta \leq 1$ As $\beta$ is fix, the strength of dependence increases with $\alpha$. Complete dependence is not achievable. Independence as $\alpha = \beta = 0$.
   \end{itemize}
-```{r 2.2}
+```{r 2.2 }
 par(mfrow=c(2,2))
 sim1 = rbvevd(200,dep=0.001, model = "hr") #HR
 plot(sim1)
@@ -235,25 +235,27 @@ y.t = transform(3.850,  mar2)
 
 #By using bayes relation betweenn conditional probabilities we get:
 #Non.par
+mar1 = mledist(tot.years[,1], "gev", start = start1)$est
+mar2 = mledist(tot.years[,2], "gev", start = start2)$est
 x.t1 = transform(1.478, mar1)
 y.t1 = transform(3.850, mar2)
 x.t2 = transform(1.95, mar1)
 y.t2 = transform(4.8, mar2)
-(prob1 = ((1 - G_star(x.t1, y.t1)) - (1 - G_star(1.95, 4.8)))/ (1 - G_star(x.t1, y.t1)))
+(prob1 = ((1 - G_star(x.t1, y.t1)) - (1 - G_star(x.t2, y.t2)))/ (1 - G_star(x.t1, y.t1)))
 
 #par (symmetric)
 x.t1 = transform(1.478, mar1)
 y.t1 = transform(3.850, mar2)
 x.t2 = transform(1.95, mar1)
 y.t2 = transform(4.8, mar2)
-(prob1 =  (pbvevd(c(1.478,3.850), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE) -  (pbvevd(c(1.95,4.8), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE))/pbvevd(c(1.478,3.850), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE)))
+(prob1 =  (pbvevd(c(x.t1,y.t1), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE) -  (pbvevd(c(x.t2,y.t2), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE))/pbvevd(c(x.t1,y.t1), dep = dep, mar1=mar1, mar2=mar2, model = c("hr"), lower.tail = FALSE)))
 ```
 
 ```{r 3.8 plotting}
 par(mfrow=c(2,2))
 ml.fml2 = fbvevd(tot.years, model = c("hr"))
 plot(ml.fml2, which=5, p=c(0.75, 0.9, 0.95))
-qcbvnonpar(data = tot.years, plot=TRUE)
+qcbvnonpar(data = tot.years, plot=TRUE, p = c(0.75, 0.9, 0.95))
 qcbvnonpar(data = tot.years, plot=TRUE, epmar = TRUE)
 ```
 
@@ -337,7 +339,7 @@ ml.fml2.2 = fbvevd(x_dat, model = c("hr"), nsloc1 =tot.years["SOI"])
 #Get margins to use in FML
 marg.fit1 = mledist(tot.years[,1], "gev", start = start)$est
 marg.fit2 = mledist(tot.years[,2], "gev", start = start)$est
-
+#Create copula from mvdc, fit with fmvdc, then we have fml? Or fit copula and only get r param?
 #Get some tau
 tau = 0.2
 
@@ -345,8 +347,11 @@ tau = 0.2
 gumbel.cop <- gumbelCopula(iTau(gumbelCopula(), tau))
 galambos.cop <- galambosCopula (iTau(galambosCopula(), tau))
 hr.cop <-huslerReissCopula(iTau(huslerReissCopula(), tau))
-# Can this be canonical method?
+gumbel.cop = 
 
+#FML (?)
+
+#These copulas are done via Canonical
 gumb.fit = fitCopula(gumbel.cop, data = pobs(tot.years))
 galamb.fit = fitCopula(galambos.cop, data = pobs(tot.years))
 hr.fit = fitCopula(hr.cop, data = pobs(tot.years))
@@ -424,7 +429,7 @@ plot(A2)
 
 ```{r Exercise 5.2}
 ## Data from Hall and Tajvidi (2004, ANZJS)
-Estim1 <- NonparEstDepFct(x=tot.years$SeaLevel.x, y= tot.years$SeaLevel.y, convex = TRUE)
+Estim1 <- NonparEstDepFct(x=tot.years$SeaLevel.x, y= tot.years$SeaLevel.y, convex.hull = FALSE)
 
 ## Plot modified Pickands Function and area in which
 ## dependence function must lie
@@ -434,7 +439,6 @@ polygon(c(0, 0.5, 1, 0), c(1, 0.5, 1, 1))
 ## Fit spline to Pickands function and add to plot
 spline.fit <- SplineFitDepFct(Estim1)
 curve(spline.fit, n = 301, add = TRUE, lty = "dashed")
-
 ```
 
 ```{r Exercise 5.3}
@@ -446,33 +450,181 @@ plot(spline.cop.approx)
 ```
 
 ```{r Exercise 5.4}
-RVs = GenerateRV(spline.cop.approx, 1000)
-prob1.emp <- as.numeric(RVs[,1] > 1.7 & RVs[,2] > 4.2)
+RVs = GenerateRV(spline.cop.approx, 10000)
+#a)
+quant1 = ecdf(tot.years[,1])(1.7) 
+quant2 = ecdf(tot.years[,2])(4.2) 
+
+prob1.emp <- as.numeric(RVs[,1] > quant1 & RVs[,2] > quant2)
 (prob1.emp = sum(prob1.emp)/length(prob1.emp))
+#b)
+quant1 = ecdf(tot.years[,1])(1.8) 
+quant2 = ecdf(tot.years[,2])(4.4) 
+
+prob1.emp <- as.numeric(RVs[,1] > quant1 & RVs[,2] > quant2)
+(prob1.emp = sum(prob1.emp)/length(prob1.emp))
+#C)
+quant1 = ecdf(tot.years[,1])(1.478) 
+quant2 = ecdf(tot.years[,2])(3.85) 
+
+prob1.emp <- as.numeric(RVs[,1] > quant1  |  RVs[,2] > quant2)
+(prob1.emp = sum(prob1.emp)/length(prob1.emp))
+
+
+#d) ???
+#prob.fin = (prob1.emp - prob2.emp)/prob1.emp
+
+prob2.emp <- as.numeric(RVs[,1] >= 1  |  RVs[,2] >= 1)
+(prob2.emp = sum(prob2.emp)/length(prob2.emp))
+
+
+quant3 = ecdf(tot.years[,1])(1.95) 
+quant4 = ecdf(tot.years[,2])(4.8)
+ 
+
+
 ```
 
+
+
 ```{r Exercise 6 type 1}
+#1
 u1 = quantile(tot.years[,1], probs = 0.30)
 u2 = quantile(tot.years[,2], probs = 0.30)
-
+#2
 mod.sym = fbvpot(tot.years, threshold = c(u1,u2), model = c("log"))
-
 mod.asym =  fbvpot(tot.years, threshold = c(u1,u2), model = c("aneglog"), std.err=FALSE)
+#3
 plot(mod.sym, p=c(0.75,0.9,0.95), which = 3)
 plot(mod.asym, p=c(0.75,0.9,0.95), which = 3)
+# 4
+marg1 = fpot(tot.years$SeaLevel.x, u1)$estimate
+marg2 = fpot(tot.years$SeaLevel.y, u2)$estimate
+
+x.lar = sum(tot.years$SeaLevel.x > u1)/length(tot.years$SeaLevel.x)
+
+y.lar = sum(tot.years$SeaLevel.y > u2)/length(tot.years$SeaLevel.y)
+
+x.t = -(log(1-x.lar*(1+marg1[2]*(tot.years$SeaLevel.x - u1)/marg1[1])^(-1/marg1[2])))^(-1)
+
+y.t = -(log(1-y.lar*(1+marg2[2]*(tot.years$SeaLevel.y - u2)/marg2[1])^(-1/marg2[2])))^(-1)
+
+mod.sym = fbvpot(c(x.t,y.t), threshold = c(u1,u2), model = c("log"))
+ mod.asym =  fbvpot(tot.years, threshold = c(u1,u2), model = c("aneglog"), std.err=FALSE)
+
+
+
+
+#Very similar, kinda agree with 3.8
+```
+```{r Exercise 6 type 1 test2}
+#1
+u1 = quantile(tot.years[,1], probs = 0.30)
+u2 = quantile(tot.years[,2], probs = 0.30)
+#2
+mod.sym = fbvpot(tot.years, threshold = c(u1,u2), model = c("log"))
+mod.asym =  fbvpot(tot.years, threshold = c(u1,u2), model = c("aneglog"), std.err=FALSE)
+#3
+plot(mod.sym, p=c(0.75,0.9,0.95), which = 3)
+plot(mod.asym, p=c(0.75,0.9,0.95), which = 3)
+# 4
+marg1 = fpot(tot.years$SeaLevel.x, u1)$estimate
+marg2 = fpot(tot.years$SeaLevel.y, u2)$estimate
+
+x.lar = sum(tot.years$SeaLevel.x > u1)/length(tot.years$SeaLevel.x)
+
+y.lar = sum(tot.years$SeaLevel.y > u2)/length(tot.years$SeaLevel.y)
+
+x.t = -(log(1-x.lar*(1+marg1[2]*(tot.years$SeaLevel.x - u1)/marg1[1])^(-1/marg1[2])))^(-1)
+
+y.t = -(log(1-y.lar*(1+marg2[2]*(tot.years$SeaLevel.y - u2)/marg2[1])^(-1/marg2[2])))^(-1)
+
+tot.years.copy = tot.years
+tot.years.copy$SeaLevel.x = x.t
+tot.years.copy$SeaLevel.y = y.t
+mod.sym = fbvpot(c(x.t,y.t), threshold = c(u1,u2), model = c("hr"))
+mod.asym =  fbvpot(tot.years, threshold = c(u1,u2), model = c("aneglog"), std.err=FALSE)
+ 
+
+
+
+
+
 #Very similar, kinda agree with 3.8
 ```
 
-```{r exercise 6.4}
 
-mtransform()
 
+
+
+```{r exercise 6 type 2}
+library(mgpd)
+fp <-
+structure(c(1.49, 1.46, 1.34, 1.74, 1.62, 1.46, 1.71, 1.74, 1.55,
+1.43, 1.62, 1.49, 1.58, 1.34, 1.37, 1.62, 1.31, 1.43, 1.49, 1.55,
+1.71, 1.49, 1.46, 1.52, 1.58, 1.65, 1.49, 1.52, 1.52, 1.49, 1.62,
+1.86, 1.58, 1.62, 1.46, 1.43, 1.46, 1.62, 1.68, 1.83, 1.62, 1.46,
+1.58, 1.77, 1.62, 1.71, 1.46, 1.6, 1.5, 1.6, 1.9, 1.7, 1.4, 1.8,
+1.37, 1.46, 1.61, 1.43, 1.67, 1.62, 1.57, 1.56, 1.46, 4.03, 3.83,
+3.65, 4.01, 4.08, 4.18, 3.8, 4.36, 3.96, 3.98, 4.69, 3.85, 3.96,
+3.85, 3.93, 3.75, 3.63, 3.57, 3.97, 4.05, 4.24, 4.22, 3.73, 4.37,
+4.06, 3.71, 3.96, 4.06, 4.55, 3.79, 3.89, 4.11, 3.85, 3.86, 3.86,
+4.21, 4.01, 4.11, 4.24, 3.96, 4.21, 3.74, 3.85, 3.88, 3.66, 4.11,
+3.71, 4.18, 3.9, 3.78, 3.91, 3.72, 4, 3.66, 3.62, 4.33, 4.55,
+3.75, 4.08, 3.9, 3.88, 3.94, 4.33), .Dim = c(63L, 2L))
+
+thr= apply(fp,2,quantile,prob=0.3)
+nms = c("Fremantle","Portpirie")
+# here we convert the data to the desired form
+potdata = mgpd_data( fp, thr=thr)
+plot( potdata[,1], potdata[,2], xlab=nms[1], ylab=nms[2], main="Exceedances" )
+abline( h=0, v=0 , lty=2)
+
+
+#fitting logistic model, (here you can also try other models; see the
+#help page for bgpd_fit).
+#init= mgpd_init(potdata)
+# est.log       = bgpd_fit(c(init,1.2),dat=potdata,model="log",fixed=FALSE)
+# default initial value (above) doesn't work so we set them manually:
+est.log = fbgpd( c(0,1,-0.1,0,1,-0.1,1.2), dat=potdata, model="log", fixed=FALSE )
+est.log$par
+# domain and probabilities for the pred regs - PRECISION COULD BE BETTER 0.001 or even finer
+x  = seq(-0.22,1,  0.005)
+y = seq(-0.27,1,  0.005)
+Q = c(0.95,0.9,0.75)
+# evaluating the density over the grid
+z  = outer(  x,  y,  dbgpd,  model="log", mar1 = est.log$par[1:3], mar2 = est.log$par[4:6], dep = est.log$par[7] )
+# calculating the prediction region
+reg     = dbgpd_region( x,  y,  z, quant = Q )
+# plotting on the original scale (threshold levels are added back)
+
+contour(reg$x+thr[1], reg$y+thr[2], reg$z, levels=reg$q, drawlabels=FALSE,
+main="Logistic BGPD", col=c(1,3,4),
+xlab=paste(nms[1],"(m)"),ylab=paste(nms[2],"(m)"),lwd=1)
+abline( h=thr[2], v=thr[1], lty=2 )
+legend( "bottomright", c(expression(gamma==0.95), expression(gamma==0.9),
+expression(gamma==0.75)), lty=1, col=c(1,3,4), title="Regions", bty="n")
+# and the obs
+points( potdata[,1]+thr[1],potdata[,2]+thr[2],cex=0.7)
+#mvdc fmvdc
+
+#Try model neglog
+
+est.neglog = fbgpd(initpar=c(0, 0.1, 0.5, 0.2, 0.3, 0.7, 2.5), dat=potdata, model="neglog", fixed=FALSE)
+
+## Calculating probabilities: note that we need to subtract the thresholds
+prob.neglog <- pbgpd(1.95 - 1.478,4.8 -
+3.850,model="log",mar1=est.neglog$par[1:3],mar2=est.neglog$par[4:6],dep=est.neglog$par[7])
+
+
+# TESTING OTHER DISTRIBUTION FUNCTIONS
+#neglog modell
+z = outer( x, y, pbgpd, model="neglog", mar1 = est.neglog$par[1:3], mar2 =
+est.neglog$par[4:6], dep = 1.5 )
+image.plot(x+thr[1], y+thr[2], z)
+contour(x+thr[1], y+thr[2], z,add=T)
+abline( h=thr[2], v=thr[1], lty=2 )
 ```
-
-
-
-
-
 
 
 
