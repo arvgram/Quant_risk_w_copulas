@@ -373,181 +373,15 @@ tail.t_cop = loss[apply(loss > u, 1, all), ]
 plot(tail.t_cop,ylim=c(0,100), xlim=c(0,100))
 ```
 
-```{r Exercise 9 FML}
-library(fitdistrplus)
-#Load data
-ins.data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
-plot(ins.data[,1], ins.data[,2], log="xy")
-cor9 = cor(ins.data[,1], ins.data[,2])
-
-#First margin (of log(data))
-
-par(mfrow= c(2,1))
-hist(ins.data[,1], breaks=60)
-margin1 = mledist(ins.data[,1], "lnorm")
-margin1$estimate
-
-test1 = rlnorm(length(ins.data[,1]),margin1$estimate[1], margin1$estimate[2])
-hist(test1, breaks=100)
-
-#Second margin:
-
-hist(ins.data[,2], breaks=500)
-margin2 = mledist(ins.data[,2], "lnorm")
-margin2$estimate
-
-test2 =rlnorm(length(ins.data[,1]),margin2$estimate[1], margin2$estimate[2])
-hist(test2, breaks=500)
-
-#Create/test a copulas:
-cop1 =  mvdc(archmCopula("frank",2 ), margins=c("lnorm", "lnorm"), paramMargins=list(list(mean=margin1$estimate[1],sd=margin1$estimate[2]), list(mean=margin2$estimate[1],sd=margin2$estimate[2])))#FML
-
-#Create starting point (b stands for margin params, a stands for copula params)
-loglikMvdc(start, ins.data, cop1)
-mm <- apply(log(ins.data), 2, mean)
-vv <- apply(log(ins.data), 2, var)
-(b1.0 <-c(mm[1],vv[1]))
-(b2.0 <- c(mm[2],vv[2]))
-(a.0 <- sin(cor(ins.data[, 1], ins.data[, 2], method = "kendall") * pi/2))
-start <- c(b1.0, b2.0, a.0)
-fit <- fitMvdc(ins.data, cop1,start=start, optim.control = list(trace = TRUE, maxit = 2000))
-
-```
-
-```{r Exercise 9 FML test 2}
-# library(fitdistrplus)
-# #Load data
-# ins.data <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
-# plot(ins.data[,1], ins.data[,2], log="xy")
-# cor9 = cor(ins.data[,1], ins.data[,2])
-# dat = log(ins.data)
-# 
-# #First margin (of log(data))
-# 
-# par(mfrow= c(2,1))
-# hist(dat[,1], breaks=60)
-# margin1 = mledist(dat[,1], "norm")
-# margin1$estimate
-# 
-# test1 = rnorm(length(dat[,1]),margin1$estimate[1], margin1$estimate[2])
-# hist(test1, breaks=100)
-# 
-# #Second margin:
-# 
-# hist(dat[,2], breaks=500)
-# margin2 = mledist(dat[,2], "norm")
-# margin2$estimate
-# 
-# test2 =rnorm(length(ins.data[,1]),margin2$estimate[1], margin2$estimate[2])
-# hist(test2, breaks=500)
-# 
-# #Create/test a copulas:
-# cop1 =  mvdc(archmCopula("gumbel",3 ), margins=c("norm", "norm"), paramMargins=list(list(mean=margin1$estimate[1],sd=margin1$estimate[2]), list(mean=margin2$estimate[1],sd=margin2$estimate[2])))
-# #FML
-# #Create starting point (b stands for margin params, a stands for copula params)
-# 
-# start2=c(margin1$estimate[1], margin1$estimate[2],margin2$estimate[1], margin2$estimate[2],0.5)
-# loglikMvdc(start, dat, cop1)
-# mm <- apply(dat, 2, mean)
-# vv <- apply(dat, 2, var)
-# (b1.0 <-c(mm[1],vv[1]))
-# (b2.0 <- c(mm[2],vv[2]))
-# (a.0 <- 1/(1-cor(dat[, 1], dat[, 2], method = "kendall")))
-# start <- c(b1.0, b2.0, a.0)
-# fit <- fitMvdc(dat, cop1, start = start, optim.control = list(trace = TRUE, maxit = 2000))
-
-```
-
-```{r Exercise 9 FML test 2}
-library(fitdistrplus)
-#Load data
-par(mfrow=c(1,1))
-dat <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
-#dat = log(dat)
-plot(dat[,1], dat[,2])
-(cor9 = cor(ins.data[,1], ins.data[,2], method="kendall"))
-# min_max_scale <- function(x) {
-#   return((x - min(x)) / (max(x) - min(x)))
-# }
-# 
-# # Apply min-max scaling to each column
-# dat_scaled <- as.data.frame(lapply(dat, min_max_scale))
-# plot(dat_scaled[,1], dat_scaled[,2], log="xy")
-
-#First margin (of log(data))
-
-par(mfrow= c(2,1))
-hist(dat[,1], breaks=60)
-margin1 = mledist(dat[,1], "lnorm")
-margin1$estimate
-test1 = rlnorm(length(dat[,1]),margin1$estimate[1], margin1$estimate[2])
-hist(test1, breaks=100)
-
-#Second margin:
-hist(dat[,2], breaks=500)
-margin2 = mledist(dat[,2], "lnorm")
-margin2$estimate
-test2 =rlnorm(length(ins.data[,1]),margin2$estimate[1], margin2$estimate[2])
-hist(test2, breaks=100)
 
 
 
 
-#Create/test a copulas:
-cop1 =  mvdc(archmCopula("gumbel",5), margins=c("lnorm", "lnorm"), paramMargins=list(list(mean=0,sd=1), list(mean=0,sd=1)))#FML
-
-cop2 =  mvdc(archmCopula("clayton",0.9 ), margins=c("lnorm", "lnorm"), paramMargins=list(list(mean=margin1$estimate[1],sd=margin1$estimate[2]), list(mean=margin2$estimate[1],sd=margin2$estimate[2])))
-
-
-test3 = rMvdc(1500, cop1)
-plot(test3, xlim = c(0, 2*10^6), ylim = c(0, 2*10^5))
-plot(dat,  xlim = c(0, 2*10^6),ylim = c(0, 2*10^5))
-#Create starting point (b stands for margin params, a stands for copula params)
-start = c(margin1$estimate, margin2$estimate, 2)
-loglikMvdc(start, as.matrix(dat), cop1)
-
-fit <- fitMvdc(as.matrix(dat), cop1, start = start, optim.control = list(trace = TRUE, maxit = 2000))
-fit2 = fitMvdc(as.matrix(dat), cop1, start = start, optim.control = list(trace = TRUE, maxit = 2000))
-fit3 = fitMvdc(as.matrix(dat), cop1, start = start, optim.control = list(trace = TRUE, maxit = 2000))
-
-test3 = rMvdc(1500, cop1)
-
-cop3 =  mvdc(archmCopula("gumbel",1.468 ), margins=c("lnorm", "lnorm"), paramMargins=list(list(mean=9.373,sd= 1.670 ), list(mean=8.523 ,sd=1.428 )))
-test3 = rMvdc(1500, cop3)
-plot(test3, xlim = c(0, 2*10^6), ylim = c(0, 2*10^5))
-plot(dat,  xlim = c(0, 2*10^6),ylim = c(0, 2*10^5))
-
-```
-
-
-
-
-```{r}
-library(copula)
-loglik.marg <- function(b, x) sum(dlnorm(x, mean = b[1], sd = b[2]))
-ctrl <- list(fnscale = -1)
-margin1Fit = mledist(dat[,1] , "lnorm")
-b1 = margin1Fit$estimate
-
-margin2Fit = mledist(dat[,2], "lnorm")
-b2 = margin2Fit$estimate
-udat <- cbind(plnorm(dat[, 1], mean = b1[1], sd = b1[2]),
- plnorm(dat[, 2], mean = b2[1], sd = b2[2]))
-fit.ifl <- fitCopula( cop3@copula,udat, start =2)
-
-#Params
-params = c(b1,b2,fit.ifl@estimate)
-
-
-```
-
-
-
-```{r trying stuff}
+```{r Exercise 9}
 dat <- read.csv("C:/Users/anton/Desktop/University/FMSN65  MASM33 - Quantitative Risk Management Using Copulas/Projects/Ass. 2/insurance.txt",sep="")
 #Skapar dist där jag använder gumbel copula och några lnorm marginaler.
 mvdc1 =  mvdc(archmCopula("gumbel",5), margins=c("lnorm", "lnorm"), paramMargins=list(list(mean=0,sd=1), list(mean=0,sd=1)))
-
+dat=as.matrix(dat)
 # Hittar ML estimates för enbart margins, kommer användas vid någon tidspunkt. Tyckte "lnorm" passade marginsen rätt bra när man plottade hist av data. 
 margin1Fit = mledist(dat[,1], "lnorm")
 margin1Fit$estimate
@@ -557,21 +391,129 @@ margin2Fit$estimate
 #Sätter några startvärden (det sista margins parametrar först, copulans paramter efter.)
 start=c(9,1.5,8.5,1.4,5)
 #FML fit. Alla parametrar av min dist fittas direkt. (går inte om jag använder marginfitsen ovan som startpunkt, av någon konstig anledning)
-fit = fitMvdc(as.matrix(dat), mvdc1, start = start, optim.control=list(trace=TRUE, maxit = 2000))
+fit1 = fitMvdc(dat, mvdc1, start = start, optim.control=list(trace=TRUE, maxit = 2000))
 
 #Testar även en Frank copula, med samma margins
 mvdc2 =  mvdc(archmCopula("frank",5), margins=c("lnorm", "lnorm"), paramMargins=list(list(mean=0,sd=1), list(mean=0,sd=1)))
-start=c(9,1.5,8.5,1.4,5)
-fit = fitMvdc(as.matrix(dat), mvdc2, start = start, optim.control=list(trace=TRUE, maxit = 2000))
+fit2 = fitMvdc(as.matrix(dat), mvdc2, start = start, optim.control=list(trace=TRUE, maxit = 2000))
+
 #Testar clayton copula
 mvdc3 =  mvdc(archmCopula("clayton",5), margins=c("lnorm", "lnorm"), paramMargins=list(list(mean=0,sd=1), list(mean=0,sd=1)))
-start=c(9,1.5,8.5,1.4,5)
-fit = fitMvdc(as.matrix(dat), mvdc3, start = start, optim.control=list(trace=TRUE, maxit = 2000))
+fit3 = fitMvdc(as.matrix(dat), mvdc3, start = start, optim.control=list(trace=TRUE, maxit = 2000))
+
+
+
+
+#Now lets try IFM
+
+#First
+loglik.marg <- function(b, x) sum(dlnorm(x, meanlog = b[1], sdlog = b[2],log = TRUE))
+ctrl <- list(fnscale = -1)
+b1hat <- optim(start[1:2], fn = loglik.marg, x = dat[, 1], control = ctrl)$par
+b2hat <- optim(start[3:4], fn = loglik.marg, x = dat[, 2], control = ctrl)$par
+
+udat <- cbind(plnorm(dat[, 1], meanlog = b1hat[1], sdlog= b1hat[2]), plnorm(dat[, 2], meanlog =  b2hat[1], sdlog = b2hat[2]))
+fit.ifl1 <- fitCopula(data=udat, mvdc1@copula, start = 5)
+
+#SECIBD
+
+fit.ifl2 <- fitCopula(data=udat, mvdc2@copula, start = c(5))
+
+#THIRD
+
+fit.ifl3 <- fitCopula(data=udat, mvdc3@copula, start = 0.5)
+
+
+#CML
+n=length(dat[,1])
+eu <- cbind((rank(dat[, 1]) - 0.5)/n, (rank(dat[, 2]) - 0.5)/n)
+
+fit.cml1 <- fitCopula(data = eu, mvdc1@copula, start = 5)
+fit.cml2 <- fitCopula(data = eu, mvdc2@copula, start = 5)
+fit.cml3 <- fitCopula(data= eu, mvdc3@copula, start = 0.2)
+
+
+
+
 
 
 #Kör goodness of fit. Hur ska man tolka det. 
-gof1 = gofCopula(fit@mvdc@copula, as.matrix(dat))
+
+#FML
+gof1 = gofCopula(fit1@mvdc@copula, as.matrix(dat))
+gof2 = gofCopula(fit2@mvdc@copula, as.matrix(dat))
+gof3 = gofCopula(fit3@mvdc@copula, as.matrix(dat))
 ```
+
+
+```{r 9 second part}
+#Skapa function från exercise
+
+RP = function(X, R , L){
+  X1=X[1]
+  X2=X[2]
+  if (X1 < R) {
+    val = 0}
+  else if (X1 >= R && X1 < L){
+    val = X1 - R + X2*(X1-R)/X1}
+  else if ( X1 >= L){
+    val=L - R + X2*(L-R)/L
+  }
+  return(val)
+}
+#Skapa lite samples
+sample1 = rMvdc(10000, fit2@mvdc)
+R_list = c(0, 2500, 7500, 9500, 0, 125000,375000, 475000, 0,250000,750000,950000)
+L_list = c(10000, 500000, 1000000)
+mean_list = c()
+count =0
+for (l in L_list) {
+  count = count + 1
+  ind_list = c((4*count-3),4*count)
+  R_list1 = R_list[ind_list[1]:ind_list[2]]
+
+  for (r in R_list1){
+    val_list = c()
+    for (i in 1:10000) {
+      val_list = c(val_list, RP(sample1[i,], r, l))}
+      print(min(val_list))
+    mean_list = c(mean_list, mean(val_list))}}
+
+plot(mean_list)
+```
+
+```{r 9 independent}
+margin1Fit = mledist(dat[,1], "lnorm")
+margin1Fit$estimate
+margin2Fit = mledist(dat[,2], "lnorm")
+margin2Fit$estimate
+gen1 = c(rlnorm(10000, meanlog =margin1Fit$estimate[1], sdlog = margin1Fit$estimate[2]))
+gen2 = c(rlnorm(10000, meanlog =margin2Fit$estimate[1], sdlog = margin2Fit$estimate[2]))
+sample2 = matrix(c(gen1, gen2),ncol=2)
+
+
+
+
+
+R_list = c(0, 2500, 7500, 9500, 0, 125000,375000, 475000, 0,250000,750000,950000)
+L_list = c(10000, 500000, 1000000)
+mean_list2 = c()
+count =0
+for (l in L_list) {
+  count = count + 1
+  ind_list = c((4*count-3),4*count)
+  R_list1 = R_list[ind_list[1]:ind_list[2]]
+
+  for (r in R_list1){
+    val_list = c()
+    for (i in 1:10000) {
+      val_list = c(val_list, RP(sample2[i,], r, l))}
+      print(min(val_list))
+    mean_list2 = c(mean_list2, mean(val_list))}}
+
+```
+
+
 
 
 
