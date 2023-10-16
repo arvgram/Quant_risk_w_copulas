@@ -195,6 +195,27 @@ gammaRand(500, 5)
 gammaRand(500, 50)
 
 ```
+
+```{r Exercise 2.4, echo = TRUE, include = TRUE}
+gammaRand <- function(n,d,theta){ ## generates n samples in d dimensions.
+  lapl_t <- function(t, a, b){
+    return((b^a)/(t+b)^a)
+  }
+  E = rexp(n*d, 1)
+  dim(E) = c(n,d)
+  shape = 1/theta
+  rate = 1
+  M = rgamma(d, shape=shape, rate=rate)
+  sample = lapl_t(t(t(E)/M), a=shape, b=rate)
+  return(sample)
+}
+gammaRand(500,3, 0.5)
+gammaRand(500,3, 1)
+gammaRand(500,3, 5)
+gammaRand(500,3, 50)
+
+```
+
 \subsection{Exercise 2.5}
 The reason T(x) is increasing is due to the fact that arctanh is increasing in this interval (between -1 and 1). 
 We get -1 and 1 as dependace for Kendalls Tau and Spearman, but only -0.914 and + 0.914 for normal correlation. Since Z and Y are created directly from X, it is reasonable that they should have perfect dependance. How ever, since there is a non-linear transform, normal Rho wont be quite as good when trying to measure this depndance. 
