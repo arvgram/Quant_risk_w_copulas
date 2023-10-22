@@ -1,6 +1,6 @@
 ---
 title: "Assignment3"
-author: "Anton Linnér"
+author: "Anton Linnér & Arvid Gramer"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -503,7 +503,134 @@ quant4 = ecdf(tot.years[,2])(4.8)
 
 ```
 
+```{r Exercise 6 Arvid}
+#1 thresholds
+u1 = quantile(tot.years[,1], probs = 0.30)
+u2 = quantile(tot.years[,2], probs = 0.30)
 
+#2 fit models
+pot1 <- fbvpot(tot.years,c(u1,u2), model = "hr")
+pot2 <- fbvpot(tot.years, c(u1,u2), model = "aneglog", std.err = FALSE)
+
+#3 plot
+par(mfrow = c(1,2))
+plot(pot1, which = 3, p=c(0.75,0.9,0.95), xlab="Fremantle",ylab="Port Pirie")
+plot(pot2, which = 3, p=c(0.75,0.9,0.95), xlab="Fremantle",ylab="Port Pirie")
+
+#4 calculate
+# we seek prob = P((X,Y) < (1.95,4.8)|(X,Y) < ̸ (1.478, 3.850)
+# P(A|B) = P(A & B)/P(B) = P((1.478, 3.850) < (X,Y) < (1.95, 4.8))/P((1.478, 3.850) < (X,Y))
+# = (F(1.95, 4.8)-F(1.478, 3.850))/(1-F(1.478, 3.850))
+
+gamx <- abs(pot1$estimate[2]) # gamma 
+sigx <- pot1$estimate[1] # sigma
+gamy <- abs(pot1$estimate[4]) # gamma
+sigy <- pot1$estimate[3] # sigma
+
+etax <- sum(tot.years[,1]>u1)/length(tot.years[,1]) # eta
+etay <- sum(tot.years[,2]>u2)/length(tot.years[,2]) # eta
+
+
+# transform to fit margins
+x_tilde <- -log(1-etax*(1+gamx*(1.95-u1)/sigx)^(-1/gamx))^-1
+y_tilde <- -log(1-etay*(1+gamy*(4.80-u2)/sigy)^(-1/gamy))^-1
+
+p1 <- pbvevd(
+  q=c(x_tilde,y_tilde),
+  dep=pot1$estimate[5],
+  model="hr",
+  lower.tail=TRUE)
+
+# transform to fit margins
+x_tilde <- -log(1-etax*(1+sigx*(1.478-u1)/sigx)^(-1/gamx))^-1
+y_tilde <- -log(1-etay*(1+sigy*(3.850-u2)/sigy)^(-1/gamy))^-1
+p2 <- pbvevd(q = c(x_tilde, y_tilde), dep = pot1$estimate[5], model = "hr", lower.tail = TRUE)
+
+prob1 <- (p1-p2)/(1-p2)
+print(prob1)
+
+
+# test P(2,5...)-thing
+x_tilde <- -log(1-etax*(1+gamx*(2-u1)/sigx)^(-1/gamx))^-1
+y_tilde <- -log(1-etay*(1+gamy*(5-u2)/sigy)^(-1/gamy))^-1
+
+p1 <- pbvevd(
+  q=c(x_tilde,y_tilde),
+  dep=pot1$estimate[5],
+  model="hr",
+  lower.tail=TRUE)
+
+x_tilde <- -log(1-etax*(1+sigx*(1.478-u1)/sigx)^(-1/gamx))^-1
+y_tilde <- -log(1-etay*(1+sigy*(3.850-u2)/sigy)^(-1/gamy))^-1
+p2 <- pbvevd(q = c(x_tilde, y_tilde), dep = pot1$estimate[5], model = "hr", lower.tail = TRUE)
+
+prob2 <- (p1-p2)/(1-p2)
+print(prob2)
+
+
+## type 2
+#mgpd package in R (authored by Pal Rakonczai).
+library(mgpd)
+par(mfrow=c(1,1))
+# The following is sea level data for Fremantle and Portpirie
+fp <-
+  structure(c(1.49, 1.46, 1.34, 1.74, 1.62, 1.46, 1.71, 1.74, 1.55,
+              1.43, 1.62, 1.49, 1.58, 1.34, 1.37, 1.62, 1.31, 1.43, 1.49, 1.55,
+              1.71, 1.49, 1.46, 1.52, 1.58, 1.65, 1.49, 1.52, 1.52, 1.49, 1.62,
+              1.86, 1.58, 1.62, 1.46, 1.43, 1.46, 1.62, 1.68, 1.83, 1.62, 1.46,
+              1.58, 1.77, 1.62, 1.71, 1.46, 1.6, 1.5, 1.6, 1.9, 1.7, 1.4, 1.8,
+              1.37, 1.46, 1.61, 1.43, 1.67, 1.62, 1.57, 1.56, 1.46, 4.03, 3.83,
+              3.65, 4.01, 4.08, 4.18, 3.8, 4.36, 3.96, 3.98, 4.69, 3.85, 3.96,
+              3.85, 3.93, 3.75, 3.63, 3.57, 3.97, 4.05, 4.24, 4.22, 3.73, 4.37,
+              4.06, 3.71, 3.96, 4.06, 4.55, 3.79, 3.89, 4.11, 3.85, 3.86, 3.86,
+              4.21, 4.01, 4.11, 4.24, 3.96, 4.21, 3.74, 3.85, 3.88, 3.66, 4.11,
+              3.71, 4.18, 3.9, 3.78, 3.91, 3.72, 4, 3.66, 3.62, 4.33, 4.55,
+              3.75, 4.08, 3.9, 3.88, 3.94, 4.33), .Dim = c(63L, 2L))
+
+
+# we must give the threshold levels first
+thr = apply(fp,2,quantile,prob=0.3)
+nms = c("Fremantle","Port Pirie")
+# here we convert the data to the desired form
+potdata = mgpd_data( fp, thr=thr )
+plot( potdata[,1], potdata[,2], xlab=nms[1], ylab=nms[2], main="Exceedances" )
+abline( h=0, v=0 , lty=2)
+
+init = mgpd_init(potdata)
+# default initial value (above) doesn't work so we set them manually:
+est.log = fbgpd( c(0,1,-0.1,0,1,-0.1,1.2), dat=potdata, model="log",
+                 fixed=FALSE )
+est.log$par
+
+#probability
+prob1.log <- pbgpd(1.95-1.478,
+                   4.8-3.850,
+                   model="log",
+                   mar1=est.log$par[1:3],
+                   mar2=est.log$par[4:6],
+                   dep=est.log$par[7]
+                   )
+prob2.log <- pbgpd(0,0,model="log",mar1=est.log$par[1:3],mar2=est.log$par[4:6],dep=est.log$par[7
+])
+
+(prob1.log - prob2.log)/(1 - prob2.log)
+
+est.psilog = fbgpd(initpar = c(0,1,-0.1,0,1,-0.1,1.2), dat = potdata, model = "psilog", fixed = FALSE, psi = 0.5)
+
+
+# plotting
+
+z = outer( x, y, pbgpd, model="log", mar1 = est.log$par[1:3], mar2 =
+             est.log$par[4:6], dep = est.log$par[7] )
+image.plot(x+thr[1], y+thr[2], z)
+contour(x+thr[1], y+thr[2], z,add=T)
+
+```
+# Type 2 BGPD
+
+
+
+```
 
 ```{r Exercise 6 type 1}
 #1
