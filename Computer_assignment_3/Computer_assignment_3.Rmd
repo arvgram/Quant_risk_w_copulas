@@ -237,8 +237,6 @@ transform <- function(x, mar){
   x.t = c((1+mar1[3]*(x-mar1[1])/mar1[2])^(1/mar1[3]), use.names=FALSE) 
 return(x.t)}
 
-#WHAT MARGIN PARAMS SHOULD I USE HERE?
-#aYBE
 
 
 #1.7 and 4.2
@@ -361,74 +359,74 @@ ml.fml2.2 = fbvevd(x_dat, model = c("hr"), nsloc1 =tot.years["SOI"])
 
 #Conclusion, SOI is statisctically significant!
 ```
+```{r Exercise 4 a}
+tot.years  = as.matrix(tot.years)
+start1 = list(loc=1, scale = 1, shape = 1)
+start2 = list(loc = 3,scale=3,shape = 2)
+marg.fit1 = mledist(tot.years[,1], "gev", start = start1)$est
+marg.fit2 = mledist(tot.years[,2], "gev", start = start2)$est
 
-```{r Exercise 4}
-#Create copula from mvdc, fit with fmvdc, then we have fml? Or fit copula and only get r param?
-# #Get some tau
-# tau = 0.2
-# 
-# #Copulas
-# gumbel.cop <- gumbelCopula(iTau(gumbelCopula(), tau))
-# galambos.cop <- galambosCopula (iTau(galambosCopula(), tau))
-# hr.cop <-huslerReissCopula(iTau(huslerReissCopula(), tau))
-# #FML (?)
-# 
-# #These copulas are done via Canonical
-# gumb.fit = fitCopula(gumbel.cop, data = pobs(tot.years))
-# galamb.fit = fitCopula(galambos.cop, data = pobs(tot.years))
-# hr.fit = fitCopula(hr.cop, data = pobs(tot.years))
-# 
-# #help
-# gumb.mvdc = mvdc(gumbel.cop, margins = c("gev", "gev") , paramMargins = list(list(loc=marg.fit1[1], scale = marg.fit1[2], shape=marg.fit1[3]),list(loc=marg.fit2[1], scale = marg.fit2[2], shape=marg.fit2[3])))
-# 
-# param= c(1,1,1,1,1,1,1)
-# param = c(marg.fit1, marg.fit2, 0.2, use.names = FALSE)
-# 
-# #(gumb.mvdc.fit = fitMvdc(as.matrix(tot.years), mvdc = gumb.mvdc, start=param, method = "Nelder"))
-# 
-# gumb.mvdc = mvdc(gumbel.cop, margins = c("gev", "gev") , paramMargins = list(list(loc=marg.fit1[1], scale = marg.fit1[2], shape=marg.fit1[3]),list(loc=marg.fit2[1], scale = marg.fit2[2], shape=marg.fit2[3])))
-# 
-# 
-# #Regular EV dists. 
-# (ml.neglog = fbvevd(tot.years, model= c("neglog")))
-# (ml.log = fbvevd(tot.years, model= c("log")))
-# (ml.hr = fbvevd(tot.years, model= c("hr") ))
-# 
-# (ml.neglog2 = fbvevd(tot.years, model= c("neglog")))
-# (ml.log2 = fbvevd(tot.years, model= c("log")))
-# (ml.hr2 = fbvevd(tot.years, model= c("hr") ))
+#From data we can see that tau is about 0.2
+tau = 0.2
+
+#Copulas
+gumbel.cop <- gumbelCopula(iTau(gumbelCopula(), tau))
+galambos.cop <- galambosCopula (iTau(galambosCopula(), tau))
+hr.cop <-huslerReissCopula(iTau(huslerReissCopula(), tau))
+
+mvdc1 =  mvdc(gumbel.cop, margins=c("gev", "gev"), paramMargins=list(list(loc=1,scale=0.2, shape = -0.1), list(loc=3.8,scale=0.2, shape = -0.1)))
+mvdc2 =  mvdc(galambos.cop, margins=c("gev", "gev"), paramMargins=list(list(loc=1,scale=0.2, shape = -0.1), list(loc=3.8,scale=0.2, shape = -0.1)))
+mvdc3 =  mvdc(hr.cop, margins=c("gev", "gev"), paramMargins=list(list(loc=1,scale=0.2, shape = -0.1), list(loc=3.8,scale=0.2, shape = -0.1)))
+
+#fml
+start = c(1,2,1,2,1,1,2)
+fit1a = fitMvdc(tot.years, mvdc1, start = start, optim.control=list(trace=TRUE, maxit = 2000))
+fit2a = fitMvdc(tot.years, mvdc2, start = start, optim.control=list(trace=TRUE, maxit = 2000))
+fit3a= fitMvdc(tot.years, mvdc3, start = start, optim.control=list(trace=TRUE, maxit = 2000))
+
+#IFM
+#Use margins to get the obs to "probabilities"
+
+udat <- cbind(pgev(tot.years[, 1], loc = marg.fit1[1], scale=marg.fit1[2],shape = marg.fit1[3]), pgev(tot.years[, 2], loc = marg.fit2[1], scale=marg.fit2[2],shape = marg.fit2[3]))
+fit1b <- fitCopula(data=udat, mvdc1@copula, start = 2)
+fit2b <- fitCopula(data=udat, mvdc2@copula, start = 2)
+fit3b <- fitCopula(data=udat, mvdc3@copula, start = 2)
+
+#CML
+n=length(tot.years[,1])
+eu <- cbind((rank(tot.years[, 1]) - 0.5)/n, (rank(tot.years[, 2]) - 0.5)/n)
+
+fit1c <- fitCopula(data = eu, mvdc1@copula, start = 2)
+fit2c <- fitCopula(data = eu, mvdc2@copula, start = 2)
+fit3c <- fitCopula(data= eu, mvdc3@copula, start = 0.2)
+
+
+#Compare with evd ?!
+
 ```
 
-```{r start with ranking data}
-# tot.years[1] = rank(tot.years$SeaLevel.x)
-# tot.years[2] = rank(tot.years$SeaLevel.y)
-# #Emp dist func evald at 12
-
-
-```
 
 ```{r exercise 4.3}
-# gof1 = gofEVCopula(gumb.fit@copula, as.matrix(tot.years))
-# 
-# #gof2 = gofEVCopula(galamb.fit@copula, as.matrix(tot.years))
-# 
-# #gof3 = gofEVCopula(hr.fit@copula, as.matrix(tot.years))
+gof1 = gofEVCopula(mvdc1@copula, as.matrix(tot.years),optim.method="Nelder-Mead")
+
+gof2 = gofEVCopula(mvdc2@copula, as.matrix(tot.years),optim.method="Nelder-Mead")
+
+gof3 = gofEVCopula(mvdc3@copula, x=as.matrix(tot.years),optim.method="Nelder-Mead")
 
 
 ```
 
 ```{r exercise 4.4}
-# w = seq(0,1, by=0.01)
-# cfg = An.biv(tot.years, w, estimator=c("CFG"))
-# pickands =  An.biv(tot.years, w, estimator=c("Pickands"))
-# 
-# par(mfrow=c(2,1))
-# plot(cfg)
-# plot(pickands)
+w = seq(0,1, by=0.01)
+cfg = An.biv(tot.years, w, estimator=c("CFG"))
+pickands =  An.biv(tot.years, w, estimator=c("Pickands"))
+
+par(mfrow=c(2,1))
+plot(cfg, main="cfg")
+plot(pickands, main = "Pickands")
 ```
 
 ```{r Exercise 4.5}
-#Parametric
 
 
 ```
