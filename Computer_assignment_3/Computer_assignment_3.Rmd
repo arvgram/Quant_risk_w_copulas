@@ -592,36 +592,58 @@ fp <-
 thr = apply(fp,2,quantile,prob=0.3)
 nms = c("Fremantle","Port Pirie")
 # here we convert the data to the desired form
-potdata = mgpd_data( fp, thr=thr )
-plot( potdata[,1], potdata[,2], xlab=nms[1], ylab=nms[2], main="Exceedances" )
-abline( h=0, v=0 , lty=2)
+potdata = mgpd_data(fp, thr=thr)
+plot(potdata[,1], potdata[,2], xlab=nms[1], ylab=nms[2], main="Exceedances" )
+abline(h=0, v=0 , lty=2)
 
 init = mgpd_init(potdata)
-# default initial value (above) doesn't work so we set them manually:
-est.log = fbgpd( c(0,1,-0.1,0,1,-0.1,1.2), dat=potdata, model="log",
+est.log = fbgpd(c(0,1,-0.1,0,1,-0.1,1.2), dat=potdata, model="log",
                  fixed=FALSE )
-est.log$par
+print(est.log$par)
+mar1 = est.log$par[1:3]
+mar2 = est.log$par[4:6]
+dep = est.log$par[7]
 
 #probability
-prob1.log <- pbgpd(1.95-1.478,
-                   4.8-3.850,
-                   model="log",
-                   mar1=est.log$par[1:3],
-                   mar2=est.log$par[4:6],
-                   dep=est.log$par[7]
-                   )
-prob2.log <- pbgpd(0,0,model="log",mar1=est.log$par[1:3],mar2=est.log$par[4:6],dep=est.log$par[7
-])
 
-(prob1.log - prob2.log)/(1 - prob2.log)
 
-est.psilog = fbgpd(initpar = c(0,1,-0.1,0,1,-0.1,1.2), dat = potdata, model = "psilog", fixed = FALSE, psi = 0.5)
+p1.log <- pbgpd(1.95-1.478,
+                4.8-3.850,
+                model="log",
+                mar1=mar1,
+                mar2=mar2,
+                dep=dep
+                )
+
+p2.log <- pbgpd(0,
+                0,
+                model="log",
+                mar1=mar1,
+                mar2=mar2,
+                dep=dep
+                )
+
+prob1 <- (p1.log - p2.log)/(1 - p2.log)
+
+## I could not find documentation on this package so I will use same as prof. Tajvidi
+est.psilog = fbgpd(
+  initpar=c(0,1,-0.1,0,1,-0.1,1.2),
+  dat=potdata,
+  model="psilog",
+  fixed=FALSE,
+  psi=0.5
+  )
 
 
 # plotting
-
-z = outer( x, y, pbgpd, model="log", mar1 = est.log$par[1:3], mar2 =
-             est.log$par[4:6], dep = est.log$par[7] )
+z = outer(x,
+          y,
+          pbgpd,
+          model="log",
+          mar1=est.log$par[1:3],
+          mar2=est.log$par[4:6], 
+          dep=est.log$par[7]
+          )
 image.plot(x+thr[1], y+thr[2], z)
 contour(x+thr[1], y+thr[2], z,add=T)
 
