@@ -625,14 +625,12 @@ p2.log <- pbgpd(0,
 
 prob1 <- (p1.log - p2.log)/(1 - p2.log)
 
-## I could not find documentation on this package so I will use same as prof. Tajvidi
-est.psilog = fbgpd(
-  initpar=c(0,1,-0.1,0,1,-0.1,1.2),
-  dat=potdata,
-  model="psilog",
-  fixed=FALSE,
-  psi=0.5
-  )
+## I could not find documentation on this package so I will use same Tajvidi's as implemented in the example
+est.taj = fbgpd(
+  c(est.log$par[1:7],0.1), 
+  dat=potdata, 
+  model="taj",
+  fixed=FALSE)
 
 
 # plotting
